@@ -4,6 +4,9 @@ import snowflake.connector
 import pandas as pd
 import geopandas as gpd
 import plotly.express as px
+from PIL import Image
+from text_content import content_translations
+import io
 
 def create_db_connection():
 
@@ -19,6 +22,21 @@ def create_db_connection():
     )
 
     return ctx
+
+@st.cache_data()
+def load_image():
+    # Load historionomical stages image
+    # Load your WebP image
+    image_path = './historionomical_stages.webp'  # Replace with your image path
+    webp_image = Image.open(image_path)
+
+    # Convert the image to a format Streamlit can display (e.g., PNG)
+    img_byte_arr = io.BytesIO()
+    webp_image.save(img_byte_arr, format='PNG')
+    img_byte_arr = img_byte_arr.getvalue()
+
+    return img_byte_arr
+
 
 @st.cache_data()
 def load_world_map():
@@ -81,51 +99,6 @@ def create_map(_world_merged, geojson, color_scale, legend, language):
 def get_click_data():
     return {}
 
-content_translations = {
-    "EN": {
-        "title" : "Historionomy Data Visualization App",
-        "intro_title" : "What is historionomy ?",
-        "intro_content" : """
-Historionomy is another way of reading History, and thereby of reading the world.
-
-In its prospective aspect, it is not about divining or approaching History as a mystical or teleological phenomenon; it is not a question of giving an ultimate meaning to history, but simply of observing how it unfolds, presenting structural effects, the 'patterns' or 'cycles' or 'historical models', which must be analyzed as the product of underlying laws.
-
-The approach to identifying these historical patterns is essentially comparative, because comparatism is an extremely useful tool in sciences where controlled experimentation is impossible (for example, in astronomy) and where only the multiplicity of recorded examples allows for the isolation of variables, the establishment of categories, and the differentiation between what is determinant and what is negligible.
-""",
-        "map_title" : "Historionomy World Map",
-        "map_content" : "This map illustrates the situation of each country in the current historionomic process of nation-states.",
-        "resources_title" : "Resources and links",
-        "resources_content" : """
-<a href="http://historionomie.net">Historionomy official site</a>
-<a href="http://historionomie.canalblog.com">Philippe Fabry's old blog</a>
-<a href="https://www.youtube.com/@PhilippeFabry">Historionomy Youtube chain (in english)</a>
-<a href="https://www.youtube.com/redirect?event=channel_description&redir_token=QUFFLUhqbUY3Qm05RFhZeWNWREpsWk1fd1Bub2JFdHhQUXxBQ3Jtc0tuYS1zSTRJYTNodjRwSnBvaWMwcjFZRDdhNUlKTDhHclhpUFluMHlPSmJ2RmJ1dTg4SGRhdzdLc0RuWXlrRmFFdDltWkpmemFRNlpyOWpOSFY2RmV0MWwzOHVaUXBBNFZZRXVDMFFsMUNWVGhwUUdTQQ&q=https%3A%2F%2Fwww.twitter.com%2FHistorionome">Philippe Fabry's Twitter/X account</a>
-<a href="https://www.youtube.com/redirect?event=channel_description&redir_token=QUFFLUhqbjNHYWNqdjIyY0dOQTl3Z1Z6a210Uk13VkxSQXxBQ3Jtc0trVTBxXzJfbkNUeE9nNUMxOVdZQzEtbTBOU2lhWlA4a2ZtOFZlSWpSemx2WC1JbXVJMzR1d3lOVVRZSklPRURmNzBoU3ZpOER1dmJndUt0Unl0SW83c0lZQkZDWURmLUU0dmE0bFY1Q1Q2dmlrM0dETQ&q=https%3A%2F%2Fwww.amazon.fr%2FPhilippe-Fabry%2Fe%2FB00KMY6LRA%3Fref%3Dsr_ntt_srch_lnk_2%26qid%3D1677943195%26sr%3D8-2">The books</a>
-""",
-    },
-    "FR": {
-        "title" : "Historionomie : infographies",
-        "intro_title" : "Qu'est ce que l'historionomie ?",
-        "intro_content" : """
-L’historionomie est une autre façon de lire l'Histoire, et par là-même de lire le monde.
-
-Dans son volet prospectif, il ne s'agit pas de faire de la divination ou d'aborder l'Histoire comme un phénomène mystique ou finaliste ; il n’est pas question de donner un sens ultime à l'histoire, simplement de constater comment elle se fait, présentant des effets structurels, les « schémas » ou « cycles » ou « modèles » historiques, que l’on doit analyser comme le produit de lois sous-jacentes.
-
-La démarche pour identifier ces schémas historiques est essentiellement comparatiste, car le comparatisme est un outil extrêmement utile dans les sciences où l'expérience contrôlée est impossible (par exemple en astronomie) et où seule la multiplicité des exemples recensés permet d'isoler des variables, de dresser des catégories, de faire le tri entre le déterminant et le négligeable.
-""",
-        "map_title" : "Carte historionomique mondiale",
-        "map_content" : "Cette carte illustre la situation de chaque pays dans le processus historionomique des états-nations à l'heure actuelle.",
-        "resources_title" : "Ressources et liens",
-        "resources_content" : """
-<a href="http://historionomie.net">Site officiel de l'historionomie</a>
-<a href="http://historionomie.canalblog.com">Ancien blog de Philippe Fabry</a>
-<a href="https://www.youtube.com/@PhilippeFabry">Chaîne Youtube de l'historionomie (en français)</a>
-<a href="https://www.youtube.com/redirect?event=channel_description&redir_token=QUFFLUhqbUY3Qm05RFhZeWNWREpsWk1fd1Bub2JFdHhQUXxBQ3Jtc0tuYS1zSTRJYTNodjRwSnBvaWMwcjFZRDdhNUlKTDhHclhpUFluMHlPSmJ2RmJ1dTg4SGRhdzdLc0RuWXlrRmFFdDltWkpmemFRNlpyOWpOSFY2RmV0MWwzOHVaUXBBNFZZRXVDMFFsMUNWVGhwUUdTQQ&q=https%3A%2F%2Fwww.twitter.com%2FHistorionome">Compte Twitter/X de Philippe Fabry</a>
-<a href="https://www.youtube.com/redirect?event=channel_description&redir_token=QUFFLUhqbjNHYWNqdjIyY0dOQTl3Z1Z6a210Uk13VkxSQXxBQ3Jtc0trVTBxXzJfbkNUeE9nNUMxOVdZQzEtbTBOU2lhWlA4a2ZtOFZlSWpSemx2WC1JbXVJMzR1d3lOVVRZSklPRURmNzBoU3ZpOER1dmJndUt0Unl0SW83c0lZQkZDWURmLUU0dmE0bFY1Q1Q2dmlrM0dETQ&q=https%3A%2F%2Fwww.amazon.fr%2FPhilippe-Fabry%2Fe%2FB00KMY6LRA%3Fref%3Dsr_ntt_srch_lnk_2%26qid%3D1677943195%26sr%3D8-2">Les livres</a>
-"""
-    }
-}
-
 languages_map_labels = {
     "FR" : {
         "label_column" : "label_fr",
@@ -159,6 +132,8 @@ def record_click(trace, points, selector):
 
 world_merged, geojson, color_scale, legend = load_world_map()
 
+historionomical_stages_img = load_image()
+
 with st.container():
 
     top_menu = st.columns(3)
@@ -178,9 +153,10 @@ with st.container():
 
     click_data = get_click_data()
 
-    introduction_tab, world_map_tab, resources_tab = st.tabs([
+    introduction_tab, world_map_tab, histo_stages_tab, resources_tab = st.tabs([
         language_content.get("intro_title", "Introduction Title"),
         language_content.get("map_title", "Map Title"),
+        language_content.get("stages_title", "Stages Title"),
         language_content.get("resources_title", "Resources Title"),
     ])
 
@@ -205,6 +181,17 @@ with st.container():
             clicked_index = click_data['clicked_point'][0]
             country_data = world_merged.iloc[clicked_index]
             st.write(f"You clicked on: {country_data['name']}")
+
+    with histo_stages_tab:
+
+        st.header(language_content.get("stages_title", "Introduction Title"))
+
+        st.markdown(format('<div class="word-wrap">%s</div>' % language_content.get("stages_content", "Lorem Ipsum")), unsafe_allow_html=True)
+
+        # Display the image in Streamlit
+        st.image(historionomical_stages_img, use_column_width=True)
+
+        st.markdown(format('<div class="word-wrap">%s</div>' % language_content.get("stages_description", "Lorem Ipsum")), unsafe_allow_html=True)
 
     with resources_tab:
 
