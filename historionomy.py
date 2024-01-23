@@ -38,7 +38,7 @@ def load_image():
     return img_byte_arr
 
 
-@st.cache_data()
+@st.cache_data(ttl=3600)
 def load_world_map():
     # Load your GeoPandas DataFrame
     # Replace this with your GeoPandas DataFrame loading
@@ -82,7 +82,7 @@ def get_translation(locale):
     return content_translations.get(locale, {})
 
 # Create a Plotly figure
-@st.cache_data()
+@st.cache_data(ttl=3600)
 def create_map(_world_merged, geojson, color_scale, legend, language):
 
     fig = px.choropleth(_world_merged, geojson=geojson, locations=_world_merged.index, 
