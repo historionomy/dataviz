@@ -53,7 +53,7 @@ def load_world_map():
     raw_data = pd.read_csv(st.secrets["historionomy_data_source"], usecols=['alpha_3', 'stage', 'reboot', 'subEntities'], na_filter=False)
 
     # Second, extract legend
-    legend = pd.read_csv(st.secrets["historionomy_legend_source"], usecols=['code', 'label_fr', 'label_en', 'baseColor', 'stripeColor'], na_filter=False)
+    legend = pd.read_csv(st.secrets["historionomy_legend_source"], usecols=['code', 'label_fr', 'label_en', 'color', 'stripeColor'], na_filter=False)
     legend = legend[legend.code != ""]
 
     # Merge with the countries DataFrame
@@ -63,7 +63,7 @@ def load_world_map():
     world_merged = world.merge(data, left_on='iso_a3', right_on="alpha_3", how='left')
 
     # Default color for other countries
-    world_merged['baseColor'].fillna('lightgrey', inplace=True)
+    world_merged['color'].fillna('lightgrey', inplace=True)
     world_merged.loc[pd.isna(world_merged['stripeColor']), 'stripeColor'] = ''
     world_merged['stripe'] = world_merged['stripeColor'] != ''
     world_merged.loc[world_merged['stripeColor'] == '', 'stripeColor'] = '#00000000'
@@ -72,8 +72,8 @@ def load_world_map():
 
     # Color Scale
     color_scale = {
-        "FR": dict(zip(legend['label_fr'], legend['baseColor'])),
-        "EN": dict(zip(legend['label_en'], legend['baseColor']))
+        "FR": dict(zip(legend['label_fr'], legend['color'])),
+        "EN": dict(zip(legend['label_en'], legend['color']))
     }
 
     return world_merged, geojson, color_scale, legend
