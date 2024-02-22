@@ -6,7 +6,21 @@ import geopandas as gpd
 import plotly.express as px
 from PIL import Image
 from text_content import content_translations
+from backend import login, load_data, load_data_debug
+from history_chart import history_chart
 import io
+
+MODE = "debug"
+# MODE = "run"
+
+backend_tables = [
+    "countries",
+    "legend",
+    "labels",
+    "stages",
+    "koinons",
+    "history"
+]
 
 def create_db_connection():
 
@@ -24,75 +38,122 @@ def create_db_connection():
     return ctx
 
 @st.cache_data()
-def load_image():
+def load_image(mode):
     # Load historionomical stages image
-    # Load your WebP image
-    image_path = './historionomical_stages.webp'  # Replace with your image path
-    webp_image = Image.open(image_path)
 
-    # Convert the image to a format Streamlit can display (e.g., PNG)
-    img_byte_arr = io.BytesIO()
-    webp_image.save(img_byte_arr, format='PNG')
-    img_byte_arr = img_byte_arr.getvalue()
+    if mode != "debug":
+        # Load your WebP image
+        image_path = './historionomical_stages.webp'  # Replace with your image path
+        webp_image = Image.open(image_path)
 
-    return img_byte_arr
+        # Convert the image to a format Streamlit can display (e.g., PNG)
+        img_byte_arr = io.BytesIO()
+        webp_image.save(img_byte_arr, format='PNG')
+        img_byte_arr = img_byte_arr.getvalue()
+
+        return img_byte_arr
+    
+    else:
+        return "debug"
 
 
 @st.cache_data(ttl=3600)
-def load_world_map():
+def load_world_map(mode):
     # Load your GeoPandas DataFrame
-    # Replace this with your GeoPandas DataFrame loading
-    world = gpd.read_file(gpd.datasets.get_path('naturalearth_lowres'))
+    if mode != "debug":
+        # Replace this with your GeoPandas DataFrame loading
+        world = gpd.read_file(gpd.datasets.get_path('naturalearth_lowres'))
 
-    # Convert the GeoPandas geometries to GeoJSON
-    geojson = world.__geo_interface__
+        # Convert the GeoPandas geometries to GeoJSON
+        geojson = world.__geo_interface__
 
-    ### Load historionomical data
+        ### Load historionomical data
 
-    # First, countries' status
-    raw_data = pd.read_csv(st.secrets["historionomy_data_source"], usecols=['alpha_3', 'stage', 'reboot', 'subEntities'], na_filter=False)
+        # First, countries' status
+        raw_data = pd.read_csv(st.secrets["historionomy_data_source"], usecols=['alpha_3', 'stage', 'reboot', 'subEntities'], na_filter=False)
 
-    # Second, extract legend
-    legend = pd.read_csv(st.secrets["historionomy_legend_source"], usecols=['code', 'label_fr', 'label_en', 'baseColor', 'stripeColor'], na_filter=False)
-    legend = legend[legend.code != ""]
+        # Second, extract legend
+        legend = pd.read_csv(st.secrets["historionomy_legend_source"], usecols=['code', 'label_fr', 'label_en', 'color', 'stripeColor'], na_filter=False)
+        legend = legend[legend.code != ""]
 
-    # Merge with the countries DataFrame
-    data = raw_data.merge(legend, left_on='stage', right_on='code', how='left')
-    data = data.drop('code', axis=1)
+        # Merge with the countries DataFrame
+        data = raw_data.merge(legend, left_on='stage', right_on='code', how='left')
+        data = data.drop('code', axis=1)
 
-    world_merged = world.merge(data, left_on='iso_a3', right_on="alpha_3", how='left')
+        world_merged = world.merge(data, left_on='iso_a3', right_on="alpha_3", how='left')
 
-    # Default color for other countries
-    world_merged['baseColor'].fillna('lightgrey', inplace=True)
-    world_merged.loc[pd.isna(world_merged['stripeColor']), 'stripeColor'] = ''
-    world_merged['stripe'] = world_merged['stripeColor'] != ''
-    world_merged.loc[world_merged['stripeColor'] == '', 'stripeColor'] = '#00000000'
+        # Default color for other countries
+        world_merged['color'].fillna('lightgrey', inplace=True)
+        world_merged.loc[pd.isna(world_merged['stripeColor']), 'stripeColor'] = ''
+        world_merged['stripe'] = world_merged['stripeColor'] != ''
+        world_merged.loc[world_merged['stripeColor'] == '', 'stripeColor'] = '#00000000'
 
-    # histo_stages = legend['code']
+        # histo_stages = legend['code']
 
-    # Color Scale
-    color_scale = {
-        "FR": dict(zip(legend['label_fr'], legend['baseColor'])),
-        "EN": dict(zip(legend['label_en'], legend['baseColor']))
-    }
+        # Color Scale
+        color_scale = {
+            "FR": dict(zip(legend['label_fr'], legend['color'])),
+            "EN": dict(zip(legend['label_en'], legend['color']))
+        }
 
-    return world_merged, geojson, color_scale, legend
+        return world_merged, geojson, color_scale, legend
+
+    else:
+        return "debug"
 
 def get_translation(locale):
     return content_translations.get(locale, {})
 
 # Create a Plotly figure
 @st.cache_data(ttl=3600)
-def create_map(_world_merged, geojson, color_scale, legend, language):
+def create_map(mode, _world_merged, geojson, color_scale, legend, language):
 
-    fig = px.choropleth(_world_merged, geojson=geojson, locations=_world_merged.index, 
-                    color=languages_map_labels[language]['label_column'], 
-                    color_discrete_map=color_scale[language],
-                    labels={languages_map_labels[language]['label_column']:languages_map_labels[language]['legend_name']},
-                    category_orders={languages_map_labels[language]['label_column']: legend[languages_map_labels[language]['label_column']]},
-                    projection='natural earth')
+    if mode != "debug":
+        fig = px.choropleth(_world_merged, geojson=geojson, locations=_world_merged.index, 
+                        color=languages_map_labels[language]['label_column'], 
+                        color_discrete_map=color_scale[language],
+                        labels={languages_map_labels[language]['label_column']:languages_map_labels[language]['legend_name']},
+                        category_orders={languages_map_labels[language]['label_column']: legend[languages_map_labels[language]['label_column']]},
+                        projection='natural earth')
 
-    return fig
+        return fig
+    else:
+        return "debug"
+    
+# Collect backend data
+@st.cache_data(ttl=3600)
+def load_backend_data():
+
+    backend_data = {}
+    for table in backend_tables:
+        backend_data[table] = load_data_debug(table)
+
+    # customize history data
+    num_records = len(backend_data['history'])
+
+    num_countries = (num_records - 1) // 4
+
+    history_dataframes = {}
+
+    for i in range(num_countries):
+        country_code = backend_data['history'].iloc[i*4+1]['alpha_3']
+        year_start = backend_data['history'].iloc[i*4+2, 2:].tolist()
+        year_finish = backend_data['history'].iloc[i*4+3, 2:].tolist()
+        status = backend_data['history'].iloc[i*4+1, 2:].tolist()
+        history_status = pd.DataFrame({"year_start": year_start, "year_finish": year_finish,"status": status})
+        history_status['country'] = country_code
+        # history_status = pd.concat([years, status], ignore_index=True)
+        history_status['year_start'] = pd.to_numeric(history_status['year_start'], errors='coerce')
+        history_status['year_finish'] = pd.to_numeric(history_status['year_finish'], errors='coerce')
+        history_status = history_status.dropna(subset=['year_start', 'status'])
+        history_status['year_finish'] = history_status['year_finish'].fillna(2024)
+        history_status = history_status.reset_index(drop=True)
+        # history_status = history_status.dropna(subset=['status'])
+        history_status['year_start'] = history_status['year_start'].astype(int)
+        history_status['year_finish'] = history_status['year_finish'].astype(int)
+        history_dataframes[country_code] = history_status
+
+    return backend_data, history_dataframes
 
 # Capture click events
 @st.cache_data()
@@ -102,11 +163,25 @@ def get_click_data():
 languages_map_labels = {
     "FR" : {
         "label_column" : "label_fr",
-        "legend_name" : "stade historionomique"
+        "legend_name" : "stade historionomique",
+        "x_label" : "année",
+        "y_label" : "pays",
+        "timeline_chart_title" : "Stade historinomique par pays et par année",
+        "status": "statut",
+        "year": "durée",
+        "country" : "pays",
+        "year_display": "année"
     },
     "EN" : {
         "label_column" : "label_en",
-        "legend_name" : "historionomical stage"
+        "legend_name" : "historionomical stage",
+        "x_label" : "year",
+        "y_label" : "country",
+        "timeline_chart_title" : "Historionomical stage by year and country",
+        "status" : "status",
+        "year" : "duration",
+        "country" : "country",
+        "year_display": "year"
     }
 }
 
@@ -130,9 +205,42 @@ def record_click(trace, points, selector):
 
 # st.title(language_content.get("title", "Default Title"))
 
-world_merged, geojson, color_scale, legend = load_world_map()
+### load data
+if MODE != "debug":
+    world_merged, geojson, color_scale, legend = load_world_map()
 
-historionomical_stages_img = load_image()
+    historionomical_stages_img = load_image()
+
+### load backend data
+backend_data, history_data = load_backend_data()
+
+### extract legend data
+legend_data = backend_data['labels'][['code', 'label_fr', 'label_en', 'color', 'stripecolor']]
+legend_data = legend_data[legend_data.code != ""]
+
+# Create a top menu
+extra_top_menu = st.columns(3)
+
+with extra_top_menu[2]:
+    # Simulate a popup for login
+    if 'logged_in' not in st.session_state or not st.session_state['logged_in']:
+        with st.container():
+            with st.expander("Login"):
+                username = st.text_input("Username")
+                password = st.text_input("Password", type="password")
+                if st.button("Login"):
+                    token, error = login(username, password)
+                    if error:
+                        st.error(f"Login failed: {error}")
+                    else:
+                        st.session_state['logged_in'] = True
+                        st.session_state['token'] = token
+                        st.session_state['username'] = username
+                        st.success("Logged in successfully!")
+
+    if 'logged_in' in st.session_state and st.session_state['logged_in']:
+        username = st.session_state.get("username", "Undefined user")
+        st.write(f"Logged in as {username}")
 
 with st.container():
 
@@ -144,20 +252,22 @@ with st.container():
 
     st.header(language_content.get("title", "Default Title"))
 
-    # Create a Plotly figure
-    fig = create_map(world_merged, geojson, color_scale, legend, st.session_state['selected_language'])
+    if MODE != "debug":
+        # Create a Plotly figure
+        fig = create_map(world_merged, geojson, color_scale, legend, st.session_state['selected_language'])
 
-    # Add click callback to the plot
-    for trace in fig.data:
-        trace.on_click(record_click)
+        # Add click callback to the plot
+        for trace in fig.data:
+            trace.on_click(record_click)
 
-    click_data = get_click_data()
+        click_data = get_click_data()
 
-    introduction_tab, world_map_tab, histo_stages_tab, resources_tab = st.tabs([
-        language_content.get("intro_title", "Introduction Title"),
-        language_content.get("map_title", "Map Title"),
-        language_content.get("stages_title", "Stages Title"),
-        language_content.get("resources_title", "Resources Title"),
+    introduction_tab, world_map_tab, histo_stages_tab, data_tab, resources_tab = st.tabs([
+        language_content.get("intro_tab", "Introduction Title"),
+        language_content.get("map_tab", "Map Title"),
+        language_content.get("stages_tab", "Stages Title"),
+        language_content.get("data_tab", "Data Title"),
+        language_content.get("resources_tab", "Resources Title"),
     ])
 
     with introduction_tab:
@@ -173,14 +283,23 @@ with st.container():
         # st.text(language_content.get("map_content", "Lorem Ipsum"))
         st.markdown(format('<div class="word-wrap">%s</div>' % language_content.get("map_content", "Lorem Ipsum")), unsafe_allow_html=True)
 
-        # Display the figure in Streamlit
-        st.plotly_chart(fig, use_container_width=True)
+        if MODE != "debug":
+            # Display the figure in Streamlit
+            st.plotly_chart(fig, use_container_width=True)
 
-        # Display captured data
-        if 'clicked_point' in click_data:
-            clicked_index = click_data['clicked_point'][0]
-            country_data = world_merged.iloc[clicked_index]
-            st.write(f"You clicked on: {country_data['name']}")
+            # Display captured data
+            if 'clicked_point' in click_data:
+                clicked_index = click_data['clicked_point'][0]
+                country_data = world_merged.iloc[clicked_index]
+                st.write(f"You clicked on: {country_data['name']}")
+
+    with data_tab:
+
+        st.header(language_content.get("data_title", "Data Title"))
+
+        history_chart(history_data, legend_data, languages_map_labels[st.session_state['selected_language']])
+
+        st.markdown(format('<div class="word-wrap">%s</div>' % language_content.get("data_content", "Lorem Ipsum")), unsafe_allow_html=True)
 
     with histo_stages_tab:
 
@@ -188,8 +307,9 @@ with st.container():
 
         st.markdown(format('<div class="word-wrap">%s</div>' % language_content.get("stages_content", "Lorem Ipsum")), unsafe_allow_html=True)
 
-        # Display the image in Streamlit
-        st.image(historionomical_stages_img, use_column_width=True)
+        if MODE != "debug":
+            # Display the image in Streamlit
+            st.image(historionomical_stages_img, use_column_width=True)
 
         st.markdown(format('<div class="word-wrap">%s</div>' % language_content.get("stages_description", "Lorem Ipsum")), unsafe_allow_html=True)
 

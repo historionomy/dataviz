@@ -1,6 +1,7 @@
 content_translations = {
     "EN": {
         "title" : "Historionomy Data Visualization App",
+        "intro_tab" : "Introduction",
         "intro_title" : "What is historionomy ?",
         "intro_content" : """
 Historionomy is another way of reading History, and thereby of reading the world.
@@ -9,8 +10,10 @@ In its prospective aspect, it is not about divining or approaching History as a 
 
 The approach to identifying these historical patterns is essentially comparative, because comparatism is an extremely useful tool in sciences where controlled experimentation is impossible (for example, in astronomy) and where only the multiplicity of recorded examples allows for the isolation of variables, the establishment of categories, and the differentiation between what is determinant and what is negligible.
 """,
+        "map_tab" : "Map",
         "map_title" : "Historionomy World Map",
         "map_content" : "This map illustrates the situation of each country in the current historionomic process of nation-states.",
+        "resources_tab" : "Resources",
         "resources_title" : "Resources and links",
         "resources_content" : """
 <a href="http://historionomie.net">Historionomy official site</a>
@@ -20,6 +23,10 @@ The approach to identifying these historical patterns is essentially comparative
 <a href="https://www.youtube.com/redirect?event=channel_description&redir_token=QUFFLUhqbjNHYWNqdjIyY0dOQTl3Z1Z6a210Uk13VkxSQXxBQ3Jtc0trVTBxXzJfbkNUeE9nNUMxOVdZQzEtbTBOU2lhWlA4a2ZtOFZlSWpSemx2WC1JbXVJMzR1d3lOVVRZSklPRURmNzBoU3ZpOER1dmJndUt0Unl0SW83c0lZQkZDWURmLUU0dmE0bFY1Q1Q2dmlrM0dETQ&q=https%3A%2F%2Fwww.amazon.fr%2FPhilippe-Fabry%2Fe%2FB00KMY6LRA%3Fref%3Dsr_ntt_srch_lnk_2%26qid%3D1677943195%26sr%3D8-2">The books</a>
 <a href="https://historionomie.fandom.com/fr/wiki/Wiki_Historionomie">Historionomy Wiki</a>
 """,
+        "data_tab" : "Data",
+        "data_title" : "Historionomical Data for all countries",
+        "data_content" : "Historionomical Data for all countries",
+        "stages_tab" : "Stages",
         "stages_title" : "Visualization of Historionomical Stages",
         "stages_content" : """
 This diagram illustrates the different phases of the historionomic journey of nation-states, featuring both the standard course and the internal variant 'Oligarchic Republic'. It is taken from <a href="https://historionomie.fandom.com/fr/wiki/Historionomy_101">Historionomy 101</a>.""",
@@ -81,6 +88,7 @@ In 1785, a national revolution occurred in the United Provinces, resulting in ma
     },
     "FR": {
         "title" : "Historionomie : infographies",
+        "intro_tab" : "Introduction",
         "intro_title" : "Qu'est ce que l'historionomie ?",
         "intro_content" : """
 L’historionomie est une autre façon de lire l'Histoire, et par là-même de lire le monde.
@@ -89,8 +97,10 @@ Dans son volet prospectif, il ne s'agit pas de faire de la divination ou d'abord
 
 La démarche pour identifier ces schémas historiques est essentiellement comparatiste, car le comparatisme est un outil extrêmement utile dans les sciences où l'expérience contrôlée est impossible (par exemple en astronomie) et où seule la multiplicité des exemples recensés permet d'isoler des variables, de dresser des catégories, de faire le tri entre le déterminant et le négligeable.
 """,
+        "map_tab" : "Carte",
         "map_title" : "Carte historionomique mondiale",
         "map_content" : "Cette carte illustre la situation de chaque pays dans le processus historionomique des états-nations à l'heure actuelle.",
+        "resources_tab" : "Ressources",
         "resources_title" : "Ressources et liens",
         "resources_content" : """
 <a href="http://historionomie.net">Site officiel de l'historionomie</a>
@@ -100,6 +110,10 @@ La démarche pour identifier ces schémas historiques est essentiellement compar
 <a href="https://www.youtube.com/redirect?event=channel_description&redir_token=QUFFLUhqbjNHYWNqdjIyY0dOQTl3Z1Z6a210Uk13VkxSQXxBQ3Jtc0trVTBxXzJfbkNUeE9nNUMxOVdZQzEtbTBOU2lhWlA4a2ZtOFZlSWpSemx2WC1JbXVJMzR1d3lOVVRZSklPRURmNzBoU3ZpOER1dmJndUt0Unl0SW83c0lZQkZDWURmLUU0dmE0bFY1Q1Q2dmlrM0dETQ&q=https%3A%2F%2Fwww.amazon.fr%2FPhilippe-Fabry%2Fe%2FB00KMY6LRA%3Fref%3Dsr_ntt_srch_lnk_2%26qid%3D1677943195%26sr%3D8-2">Les livres</a>
 <a href="https://historionomie.fandom.com/fr/wiki/Wiki_Historionomie">Wiki Historionomie</a>
 """,
+        "data_tab" : "Data",
+        "data_title" : "Données historionomiques pour tous les pays",
+        "data_content" : "Données historionomiques pour tous les pays",
+        "stages_tab" : "Etapes",
         "stages_title" : "Visualisation des étapes historionomiques",
         "stages_content" : """
 Ce schéma illustre les différentes phases du parcours historionomique des états-nations, avec le parcours standard ainsi que la variante interne "République Oligarchique". Il est tiré de <a href="https://historionomie.fandom.com/fr/wiki/Historionomy_101">Historionomy 101</a>
