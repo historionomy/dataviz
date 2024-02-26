@@ -5,7 +5,7 @@ import plotly.express as px
 import numpy as np
 
 # Function to create a bar chart with absolute years
-def create_absolute_year_chart(history_data, legend_data, language_labels):
+def create_year_chart(history_data, legend_data, language_labels, mode, relative_status):
 
     
     # print(domain)
@@ -28,58 +28,101 @@ def create_absolute_year_chart(history_data, legend_data, language_labels):
     # ]
     # data = history_data['FRA']
     # print(data)
+    # history_data = {
+    #     "GER": history_data['GER']
+    # }
+    max_display_length = 0
     for country in history_data.keys():
+        
         # history_data[country].dropna(subset="year")
         # history_data[country] = history_data[country].reset_index(drop=True)
-        # print(country)
+        print(history_data[country])
         nb_steps = len(history_data[country])
         # we will add an extra line of status at the end of the current country course, for display purposes (we want current status to be displayed *at the right* of the associated datetime)
-        print(nb_steps)
-        print(country)
+        # print(nb_steps)
+        # print(country)
         history_data[country]['year_display'] = history_data[country]['year_start']
+        # we need at least two steps to display something
         if nb_steps > 1:
-            history_data[country] = history_data[country].sort_values(by='year_start', ascending=True)
-            ending_status = pd.DataFrame({
-                'country' : [country],
-                'year_start' : history_data[country]['year_finish'].iloc[-1],
-                'year_display' : history_data[country]['year_finish'].iloc[-1],
-                'year_finish' : history_data[country]['year_finish'].iloc[-1] + 50,
-                'status' : history_data[country]['status'].iloc[-1],
-            })
-            for i in range(1, nb_steps):
-                # we replace year_start by the number of years since precedent status, for barchart display purposes
-                # year_start[i] <- (year_start[i] - year_start[i-1]
+            # we need to have the pivot status in the country dataset to display something - if we are in absolute mode, pivot status is BARBARIANS
+            print(relative_status)
+            print(mode)
+            # print(history_data[country]['status'].tolist())
+            # if relative_status in history_data[country]['status'].tolist():
+            if (mode == "Absolute") or ( relative_status in history_data[country]['status'].tolist()):
+                print("valid relative status")
+                # if we are in relative mode, we will substract the year_start of the pivot status to starting year
+                country_offset = 0
+                if mode == "Relative":
+                    country_offset = history_data[country].loc[history_data[country]['status'] == relative_status, 'year_start'].iloc[0]
+                    # history_data[country]['year_start'] = history_data[country]['year_start'] - country_offset
+                    # history_data[country]['year_finish'] = history_data[country]['year_finish'] - country_offset
+                history_data[country] = history_data[country].sort_values(by='year_start', ascending=True)
+                ending_status = pd.DataFrame({
+                    'country' : [country],
+                    'year_start' : history_data[country]['year_finish'].iloc[-1],
+                    'year_display' : history_data[country]['year_start'].iloc[-1],
+                    'year_finish' : history_data[country]['year_finish'].iloc[-1] + 50,
+                    'status' : history_data[country]['status'].iloc[-1],
+                })
+                history_data[country] = pd.concat([history_data[country], ending_status], ignore_index=True)
+                pivot_index = 0
+                if mode == "Relative":
+                    pivot_index = history_data[country][history_data[country]['status'] == relative_status].index[0]
+                for i in range(1, nb_steps + 1):
+                    # we replace year_start by the number of years since precedent status, for barchart display purposes
+                    # year_start[i] <- (year_start[i] - year_start[i-1]
 
-                # First, calculate the index to modify directly since iloc[-i] and iloc[-i-1] refer to positions from the end
-                index_to_modify = history_data[country].index[-i]
-                index_to_copy_from = history_data[country].index[-i-1]
+                    # First, calculate the index to modify directly since iloc[-i] and iloc[-i-1] refer to positions from the end
+                    index_to_modify = history_data[country].index[-i]
+                    index_to_copy_from = history_data[country].index[-i-1]
 
-                diff = history_data[country]['year_start'].iloc[-i] - history_data[country]['year_start'].iloc[-i-1]
-                if diff >= 0:
-                    history_data[country].loc[index_to_modify, 'year_start'] = diff
-                    # history_data[country]['year_start'].iloc[-i] = diff
-                else :
-                    history_data[country].loc[index_to_modify, 'year_start'] = 0
-                    # history_data[country]['year_start'].iloc[-i] = 0
+                    print(country)
+                    print(i)
+                    print(index_to_modify)
+                    print(history_data[country].loc[index_to_modify, 'status'])
+                    print(history_data[country].loc[index_to_modify, 'year_start'])
+                    diff = history_data[country]['year_start'].iloc[-i] - history_data[country]['year_start'].iloc[-i-1]
+                    if diff >= 0:
+                        if mode == "Relative":
+                            if country_offset >= history_data[country]['year_start'].iloc[-i]:
+                                diff = - diff
+                        history_data[country].loc[index_to_modify, 'year_start'] = diff
+                        # history_data[country]['year_start'].iloc[-i] = diff
+                    else :
+                        history_data[country].loc[index_to_modify, 'year_start'] = 0
+                        # history_data[country]['year_start'].iloc[-i] = 0
 
-                # we shift the status of one line forward, for barchart display purposes
+                    # we shift the status of one line forward, for barchart display purposes
 
-                # Now, use .loc to perform the assignment, thereby avoiding the warning and modifying the original DataFrame
-                history_data[country].loc[index_to_modify, 'year_display'] = history_data[country].loc[index_to_copy_from, 'year_display']
-                history_data[country].loc[index_to_modify, 'status'] = history_data[country].loc[index_to_copy_from, 'status']
-                # history_data[country]['status'].iloc[-i] = history_data[country]['status'].iloc[-i-1]
-                # history_data[country]['year_display'].iloc[-i] = history_data[country]['year_display'].iloc[-i-1]
-                # history_data[country].loc[i, 'year'] = history_data[country].loc[i-1, 'year'] - (history_data[country].loc[i, 'year'] - history_data[country].loc[i-1, 'year'])
-            # history_data
-            # print(history_data[country])
-            # first status set to 'BARBARIANS'
-            first_index = history_data[country].index[0]
-            history_data[country].loc[first_index, 'status'] = 'BARBARIANS'
-            # history_data[country]['status'].iloc[0] = 'BARBARIANS'
-            history_data[country].loc[first_index, 'year_display'] = 0
-            # history_data[country]['year_display'].iloc[0] = 0
-            # adding extra line at the end for display purposes
-            history_data[country] = pd.concat([history_data[country], ending_status], ignore_index=True)
+                    # Now, use .loc to perform the assignment, thereby avoiding the warning and modifying the original DataFrame
+                    history_data[country].loc[index_to_modify, 'year_display'] = history_data[country].loc[index_to_copy_from, 'year_display']
+                    history_data[country].loc[index_to_modify, 'status'] = history_data[country].loc[index_to_copy_from, 'status']
+                    # history_data[country]['status'].iloc[-i] = history_data[country]['status'].iloc[-i-1]
+                    # history_data[country]['year_display'].iloc[-i] = history_data[country]['year_display'].iloc[-i-1]
+                    # history_data[country].loc[i, 'year'] = history_data[country].loc[i-1, 'year'] - (history_data[country].loc[i, 'year'] - history_data[country].loc[i-1, 'year'])
+                # history_data
+                # print(history_data[country])
+                # first status set to 'BARBARIANS'
+                first_index = history_data[country].index[0]
+                history_data[country].loc[first_index, 'status'] = 'BARBARIANS'
+                # history_data[country]['status'].iloc[0] = 'BARBARIANS'
+                history_data[country].loc[first_index, 'year_display'] = 0
+                # history_data[country]['year_display'].iloc[0] = 0
+                # adding extra line at the end for display purposes
+                # history_data[country] = pd.concat([history_data[country], ending_status], ignore_index=True)
+
+                # set offset if relative datetime
+                if mode == "Relative":
+                    print("Offsetting relative zero year")
+                    print(country_offset)
+                    history_data[country].loc[first_index, 'year_start'] = history_data[country].loc[first_index, 'year_start'] - country_offset
+                    # history_data[country]['year_start'] = history_data[country]['year_start'] - country_offset
+                    # history_data[country]['year_finish'] = history_data[country]['year_finish'] - country_offset
+                    last_index = history_data[country].index[-1]
+                    last_year = history_data[country].loc[last_index, 'year_finish'] - country_offset
+                    max_display_length = max(max_display_length, last_year)
+                    history_data[country].iloc[:pivot_index+1] = history_data[country].iloc[:pivot_index+1].iloc[::-1].values
 
     history_data = {k:v for k,v in history_data.items() if len(v)>1}
     data = pd.concat(history_data.values(), ignore_index=True)
@@ -110,12 +153,16 @@ def create_absolute_year_chart(history_data, legend_data, language_labels):
     # Plotting with Plotly Express
     # fig = px.bar(timeline_df, x="year", y="country", color="status", title="Project Timeline by Year")
 
-    print(data['year_start'])
+    # print(data['year_start'])
 
-    display_year_not_barbarians = data[data['status'] != 'BARBARIANS']['year_display'].tolist()
+    if mode == "Absolute":
+        display_year_not_barbarians = data[data['status'] != 'BARBARIANS']['year_display'].tolist()
 
-    min_time = min(display_year_not_barbarians) - 50
-    max_time = max(display_year_not_barbarians) + 50
+        min_time = min(display_year_not_barbarians) - 50
+        max_time = max(display_year_not_barbarians) + 50
+    if mode == "Relative":
+        min_time = min(data['year_start'].tolist())
+        max_time = max_display_length
 
     # remap status to language label
     status_mapping = pd.Series(legend_data[language_labels['label_column']].values,index=legend_data['code']).to_dict()
@@ -127,10 +174,10 @@ def create_absolute_year_chart(history_data, legend_data, language_labels):
     domain = legend_data['code'].tolist()
     legend_range = legend_data['color'].tolist()
 
-    print(domain)
-    print(legend_range)
+    # print(domain)
+    # print(legend_range)
     color_map = {key: value for key, value in zip(domain, legend_range)}
-    print(color_map)
+    # print(color_map)
 
     # rename columns for hover data consistency
     data.rename(columns={
@@ -161,7 +208,7 @@ def create_absolute_year_chart(history_data, legend_data, language_labels):
                  )
 
     # Customize the layout
-    print(min_time)
+    print(min_time, max_time)
     fig.update_layout(xaxis_range=[min_time,max_time])
     fig.update_layout(xaxis_title="year", yaxis_title="country")
     fig.update_layout(bargap=0.1)
@@ -280,8 +327,12 @@ def history_chart(history_data, legend_data, language_labels):
     top_menu = st.columns(3)
     with top_menu[0]:
         timeline_type = st.selectbox("Sort By", options=["Absolute", "Relative"])
+    relative_status = "NATIONAL_REVOLUTION_1"
     if timeline_type == "Relative":
-        relative_status = st.selectbox("Align courses on status", options=legend_data['code'].tolist())
+        status_options = legend_data['code'].dropna().tolist()
+        print(status_options)
+        status_options.remove("BARBARIANS")
+        relative_status = st.selectbox("Align courses on status", options=status_options)
     # # Sidebar to upload files
     # uploaded_files = st.sidebar.file_uploader("Upload CSV files", accept_multiple_files=True)
 
@@ -307,8 +358,8 @@ def history_chart(history_data, legend_data, language_labels):
     # st.write("Horizontal Bar Charts:")
     # if display_mode == "Absolute Years":
     # create_absolute_year_chart(history_data, legend_data)
-    print(language_labels)
-    st.plotly_chart(create_absolute_year_chart(history_data, legend_data, language_labels), use_container_width=True)
+    # print(language_labels)
+    st.plotly_chart(create_year_chart(history_data, legend_data, language_labels, timeline_type, relative_status), use_container_width=True)
     #     # create_absolute_year_chart(history_data, legend_data)
     #     st.altair_chart(create_absolute_year_chart(history_data, legend_data), use_container_width=True)
     # elif display_mode == "Aligned Years":
