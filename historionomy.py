@@ -22,6 +22,13 @@ backend_tables = [
     "history"
 ]
 
+owid_datasets = {
+    "literacy": "cross-country-literacy-rates",
+    "gdp" : "gdp-per-capita-penn-world-table",
+    "urbanization" : "long-term-urban-population-region",
+    "gov" : "historical-gov-spending-gdp"
+}
+
 def create_db_connection():
 
     # Connect to Snowflake
@@ -127,6 +134,12 @@ def load_backend_data():
     backend_data = {}
     for table in backend_tables:
         backend_data[table] = load_data_debug(table)
+        # backend_data[table] = load_data(table)
+
+    for table_id, table_name in owid_datasets.items():
+        backend_data[table_id] = load_data_debug(table_name)
+        backend_data[table_id].columns.values[3] = table_id + "_data"
+        # backend_data[table_id] = load_data(table_id)
 
     # customize history data
     num_records = len(backend_data['history'])
@@ -153,7 +166,14 @@ def load_backend_data():
         history_status['year_finish'] = history_status['year_finish'].astype(int)
         history_dataframes[country_code] = history_status
 
-    return backend_data, history_dataframes
+    stats_dataframes = {}
+    for table_id in owid_datasets.keys():
+        stats_dataframes[table_id] = {
+            code: group[['year', table_id + "_data"]].reset_index(drop=True) 
+            for code, group in backend_data[table_id].groupby('code')
+        }
+
+    return backend_data, history_dataframes, stats_dataframes
 
 # Capture click events
 @st.cache_data()
@@ -166,11 +186,35 @@ languages_map_labels = {
         "legend_name" : "stade historionomique",
         "x_label" : "année",
         "y_label" : "pays",
-        "timeline_chart_title" : "Stade historinomique par pays et par année",
+        "timeline_chart_title" : "Stade historionomique par pays et par année",
         "status": "statut",
         "year": "durée",
         "country" : "pays",
-        "year_display": "année"
+        "year_display": "année",
+        "timeline_display_label": "sort by",
+        "country_selection_label": "choisir les pays",
+        "stats_year_label" : "année",
+        "stats_title" : {
+            "none" : {
+                "label": "aucun"
+            },
+            "gov" : {
+                "title" : "Dépenses publiques en pourcentage du PIB",
+                "label" : "percent PIB"
+            },
+            "literacy" : {
+                "title" : "Taux d'alphabétisation",
+                "label" : "percent PIB"
+            },
+            "gdp" : {
+                "title" : "PIB/habitant en $ PPA corrigé de l'inflation",
+                "label" : "PIB/hab PPA"
+            },
+            "urbanization" : {
+                "title" : "Taux d'urbanisation",
+                "label" : "Taux d'urbanisation"
+            }
+        }
     },
     "EN" : {
         "label_column" : "label_en",
@@ -181,7 +225,31 @@ languages_map_labels = {
         "status" : "status",
         "year" : "duration",
         "country" : "country",
-        "year_display": "year"
+        "year_display": "year",
+        "timeline_display_label": "sort by",
+        "country_selection_label": "choose countries",
+        "stats_year_label" : "year",
+        "stats_title" : {
+            "none" : {
+                "label": "none"
+            },
+            "gov" : {
+                "title" : "Government spending in pct of GDP",
+                "label" : "percent GDP"
+            },
+            "literacy" : {
+                "title" : "Literacy rate",
+                "label" : "Literacy rate"
+            },
+            "gdp" : {
+                "title" : "GDP PPA per capita (constant $)",
+                "label" : "GDP PPA per capita"
+            },
+            "urbanization" : {
+                "title" : "Urbanization rate",
+                "label" : "Urbanization rate"
+            }
+        }
     }
 }
 
@@ -212,7 +280,7 @@ if MODE != "debug":
     historionomical_stages_img = load_image()
 
 ### load backend data
-backend_data, history_data = load_backend_data()
+backend_data, history_data, stats_data = load_backend_data()
 
 ### extract legend data
 legend_data = backend_data['labels'][['code', 'label_fr', 'label_en', 'color', 'stripecolor']]
@@ -297,7 +365,9 @@ with st.container():
 
         st.header(language_content.get("data_title", "Data Title"))
 
-        history_chart(history_data, legend_data, languages_map_labels[st.session_state['selected_language']])
+        print(history_data.keys())
+
+        history_chart(history_data, legend_data, stats_data, languages_map_labels[st.session_state['selected_language']])
 
         st.markdown(format('<div class="word-wrap">%s</div>' % language_content.get("data_content", "Lorem Ipsum")), unsafe_allow_html=True)
 
