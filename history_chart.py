@@ -124,16 +124,21 @@ def create_year_chart(history_data, legend_data, stats_data, language_labels, mo
         # subset = ["NLD", "FRA", "GBR", "BRA"]
                             
         # sordid hack to force the "oligarchic republic" stages to be displayed BEFORE
-        # the Ancien Regime stage, by putting NLD country as the top country
+        # the Ancien Regime stage, by putting an oligarchic republic country as the top country
         # because plotly create display order by scanning status by order of encounter
         custom_oligarchic_status = False
-        if 'NLD' in history_data.keys():
-            nld_data = history_data.pop('NLD')
-            custom_oligarchic_status = True
+        chosen_country = "NLD"
+        for k, v in history_data.items():
+            if 'OLIGARCHIC_REVOLUTION' in v['status'].tolist():
+                custom_oligarchic_status = True
+                chosen_country = k
+                break
+        if custom_oligarchic_status:
+            custom_data = history_data.pop(chosen_country)
 
         data = pd.concat(history_data.values(), ignore_index=True)
         if custom_oligarchic_status:
-            data = pd.concat([nld_data, data], ignore_index=True)
+            data = pd.concat([custom_data, data], ignore_index=True)
 
         # if a metric has been set, we do the same for OWID data for all countries
         owid_data = {}
