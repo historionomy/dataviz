@@ -272,6 +272,12 @@ languages_map_labels = {
     }
 }
 
+#############
+# APP START #
+#############
+
+### DATA LOADING AND PREPROCESSING
+
 # Custom CSS to force word wrap
 st.markdown("""
     <style>
@@ -311,6 +317,8 @@ stats_data = {
 ### extract legend data
 legend_data = backend_data['labels'][['code', 'label_fr', 'label_en', 'color', 'stripecolor']]
 legend_data = legend_data[legend_data.code != ""]
+
+### DRAWING FRONTEND
 
 # Create a top menu
 extra_top_menu = st.columns(3)
@@ -356,6 +364,7 @@ with st.container():
 
         click_data = get_click_data()
 
+    # Create main tabs
     introduction_tab, world_map_tab, histo_stages_tab, data_tab, resources_tab = st.tabs([
         language_content.get("intro_tab", "Introduction Title"),
         language_content.get("map_tab", "Map Title"),
