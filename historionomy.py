@@ -172,9 +172,9 @@ def load_backend_data():
                 history_status = history_status.dropna(subset=['year_start', 'status'])
                 history_status['year_finish'] = history_status['year_finish'].fillna(2024)
                 history_status = history_status.reset_index(drop=True)
-                # history_status = history_status.dropna(subset=['status'])
                 history_status['year_start'] = history_status['year_start'].astype(int)
                 history_status['year_finish'] = history_status['year_finish'].astype(int)
+                history_status = history_status.sort_values(by='year_start', ascending=True).reset_index(drop=True)
                 history_dataframes[country_code] = history_status
 
     stats_dataframes = {}

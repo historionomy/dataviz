@@ -43,7 +43,7 @@ def create_year_chart(history_data, legend_data, stats_data, language_labels, mo
                         country_offset = history_data[country].loc[history_data[country]['status'] == relative_status, 'year_start'].iloc[0]
 
                     # we sort all historionomical steps by ascending order of year_start, to avoid inconsistencies in the display
-                    history_data[country] = history_data[country].sort_values(by='year_start', ascending=True)
+                    history_data[country] = history_data[country].sort_values(by='year_start', ascending=True).reset_index(drop=True)
 
                     # we concatenate an "ending_status" row at the end of the current country course, that will be used for display purposes
                     ending_status = pd.DataFrame({
@@ -121,7 +121,19 @@ def create_year_chart(history_data, legend_data, stats_data, language_labels, mo
 
         # we concatenate all historionomical courses for all countries as a single dataset for the bar chart
         history_data = {k:v for k,v in history_data.items() if len(v)>1}
+        # subset = ["NLD", "FRA", "GBR", "BRA"]
+                            
+        # sordid hack to force the "oligarchic republic" stages to be displayed BEFORE
+        # the Ancien Regime stage, by putting NLD country as the top country
+        # because plotly create display order by scanning status by order of encounter
+        custom_oligarchic_status = False
+        if 'NLD' in history_data.keys():
+            nld_data = history_data.pop('NLD')
+            custom_oligarchic_status = True
+
         data = pd.concat(history_data.values(), ignore_index=True)
+        if custom_oligarchic_status:
+            data = pd.concat([nld_data, data], ignore_index=True)
 
         # if a metric has been set, we do the same for OWID data for all countries
         owid_data = {}
@@ -161,11 +173,12 @@ def create_year_chart(history_data, legend_data, stats_data, language_labels, mo
             'year_display': language_labels['year_display'],
             }, inplace=True)
 
+        label_order = legend_data[language_labels['label_column']].tolist()
         fig = px.bar(data, 
                     x='year_start', 
                     y=language_labels['country'], 
                     color=language_labels['status'], 
-                    category_orders={language_labels['label_column']: legend_data[language_labels['label_column']]},
+                    category_orders={language_labels['label_column']: label_order},
                     color_discrete_map = color_map,
                     orientation="h", 
                     title=language_labels['timeline_chart_title'],
