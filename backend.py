@@ -72,9 +72,19 @@ def load_data(table_name):
     key: str = st.secrets["SUPABASE_PROJECT_API_KEY"]
     supabase: Client = create_client(url, key)
 
-    data = supabase.table(table_name).select("*").execute().data
+    offset = 0
+    limit = 1000  # or any other chunk size that works for your application
+    all_records = []
 
-    data = pd.DataFrame(data)
+    while True:
+        response = supabase.table(table_name).select("*").range(offset, offset + limit - 1).execute()
+        data = response.data
+        if not data:
+            break  # Break the loop if no more records are returned
+        all_records.extend(data)
+        offset += limit
+
+    data = pd.DataFrame(all_records)
 
     return data
 

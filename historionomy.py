@@ -10,8 +10,8 @@ from backend import login, load_data, load_data_debug
 from history_chart import history_chart
 import io
 
-MODE = "debug"
-# MODE = "run"
+# MODE = "debug"
+MODE = "run"
 
 backend_tables = [
     "countries",
@@ -133,13 +133,17 @@ def load_backend_data():
 
     backend_data = {}
     for table in backend_tables:
-        backend_data[table] = load_data_debug(table)
-        # backend_data[table] = load_data(table)
+        if MODE == "debug":
+            backend_data[table] = load_data_debug(table)
+        else:
+            backend_data[table] = load_data(table)
 
     for table_id, table_name in owid_datasets.items():
-        backend_data[table_id] = load_data_debug(table_name)
+        if MODE == "debug":
+            backend_data[table_id] = load_data_debug(table_name)
+        else:
+            backend_data[table_id] = load_data(table_id)
         backend_data[table_id].columns.values[3] = table_id + "_data"
-        # backend_data[table_id] = load_data(table_id)
 
     # customize history data
     num_records = len(backend_data['history'])
@@ -148,23 +152,30 @@ def load_backend_data():
 
     history_dataframes = {}
 
+    # get list of country codes
+    all_country_codes = backend_data['countries']['alpha_3'].dropna().tolist()
+    all_country_codes = [
+        str(ctry) for ctry in all_country_codes if (str(ctry) != "Modèle" and str(ctry) is not None)
+    ]
+
     for i in range(num_countries):
         country_code = backend_data['history'].iloc[i*4+1]['alpha_3']
-        year_start = backend_data['history'].iloc[i*4+2, 2:].tolist()
-        year_finish = backend_data['history'].iloc[i*4+3, 2:].tolist()
-        status = backend_data['history'].iloc[i*4+1, 2:].tolist()
-        history_status = pd.DataFrame({"year_start": year_start, "year_finish": year_finish,"status": status})
-        history_status['country'] = country_code
-        # history_status = pd.concat([years, status], ignore_index=True)
-        history_status['year_start'] = pd.to_numeric(history_status['year_start'], errors='coerce')
-        history_status['year_finish'] = pd.to_numeric(history_status['year_finish'], errors='coerce')
-        history_status = history_status.dropna(subset=['year_start', 'status'])
-        history_status['year_finish'] = history_status['year_finish'].fillna(2024)
-        history_status = history_status.reset_index(drop=True)
-        # history_status = history_status.dropna(subset=['status'])
-        history_status['year_start'] = history_status['year_start'].astype(int)
-        history_status['year_finish'] = history_status['year_finish'].astype(int)
-        history_dataframes[country_code] = history_status
+        if country_code is not None:
+            if country_code in all_country_codes:
+                year_start = backend_data['history'].iloc[i*4+2, 2:].tolist()
+                year_finish = backend_data['history'].iloc[i*4+3, 2:].tolist()
+                status = backend_data['history'].iloc[i*4+1, 2:].tolist()
+                history_status = pd.DataFrame({"year_start": year_start, "year_finish": year_finish,"status": status})
+                history_status['country'] = country_code
+                history_status['year_start'] = pd.to_numeric(history_status['year_start'], errors='coerce')
+                history_status['year_finish'] = pd.to_numeric(history_status['year_finish'], errors='coerce')
+                history_status = history_status.dropna(subset=['year_start', 'status'])
+                history_status['year_finish'] = history_status['year_finish'].fillna(2024)
+                history_status = history_status.reset_index(drop=True)
+                # history_status = history_status.dropna(subset=['status'])
+                history_status['year_start'] = history_status['year_start'].astype(int)
+                history_status['year_finish'] = history_status['year_finish'].astype(int)
+                history_dataframes[country_code] = history_status
 
     stats_dataframes = {}
     for table_id in owid_datasets.keys():
@@ -191,8 +202,12 @@ languages_map_labels = {
         "year": "durée",
         "country" : "pays",
         "year_display": "année",
-        "timeline_display_label": "sort by",
+        "timeline_display_label": "trier par",
         "country_selection_label": "choisir les pays",
+        "country_search_label" : "chercher pays",
+        "relative_status_label" : "aligner les parcours sur l'étape",
+        "absolute_display_mode_label" : "Absolu",
+        "relative_display_mode_label" : "Relatif",
         "stats_year_label" : "année",
         "stats_title" : {
             "none" : {
@@ -200,7 +215,7 @@ languages_map_labels = {
             },
             "gov" : {
                 "title" : "Dépenses publiques en pourcentage du PIB",
-                "label" : "percent PIB"
+                "label" : "Dep. gouv. percent PIB"
             },
             "literacy" : {
                 "title" : "Taux d'alphabétisation",
@@ -228,6 +243,10 @@ languages_map_labels = {
         "year_display": "year",
         "timeline_display_label": "sort by",
         "country_selection_label": "choose countries",
+        "country_search_label" : "search country",
+        "relative_status_label" : "Align courses on status",
+        "absolute_display_mode_label" : "Absolute",
+        "relative_display_mode_label" : "Relative",
         "stats_year_label" : "year",
         "stats_title" : {
             "none" : {
@@ -235,7 +254,7 @@ languages_map_labels = {
             },
             "gov" : {
                 "title" : "Government spending in pct of GDP",
-                "label" : "percent GDP"
+                "label" : "Gov. spend. percent GDP"
             },
             "literacy" : {
                 "title" : "Literacy rate",
@@ -275,12 +294,19 @@ def record_click(trace, points, selector):
 
 ### load data
 if MODE != "debug":
-    world_merged, geojson, color_scale, legend = load_world_map()
 
-    historionomical_stages_img = load_image()
+    world_merged, geojson, color_scale, legend = load_world_map(MODE)
+
+    historionomical_stages_img = load_image(MODE)
 
 ### load backend data
 backend_data, history_data, stats_data = load_backend_data()
+
+stats_data = {
+    mtr: {
+        k: v for k, v in dat.items() if k in history_data.keys()
+    } for mtr, dat in stats_data.items()
+}
 
 ### extract legend data
 legend_data = backend_data['labels'][['code', 'label_fr', 'label_en', 'color', 'stripecolor']]
@@ -322,7 +348,7 @@ with st.container():
 
     if MODE != "debug":
         # Create a Plotly figure
-        fig = create_map(world_merged, geojson, color_scale, legend, st.session_state['selected_language'])
+        fig = create_map(MODE, world_merged, geojson, color_scale, legend, st.session_state['selected_language'])
 
         # Add click callback to the plot
         for trace in fig.data:
@@ -365,9 +391,7 @@ with st.container():
 
         st.header(language_content.get("data_title", "Data Title"))
 
-        print(history_data.keys())
-
-        history_chart(history_data, legend_data, stats_data, languages_map_labels[st.session_state['selected_language']])
+        history_chart(history_data, legend_data, stats_data, languages_map_labels)
 
         st.markdown(format('<div class="word-wrap">%s</div>' % language_content.get("data_content", "Lorem Ipsum")), unsafe_allow_html=True)
 
