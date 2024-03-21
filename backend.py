@@ -90,7 +90,7 @@ def load_data(table_name):
 
 def load_data_debug(table_name):
 
-    df = pd.read_csv("../data-tooling/" + table_name + ".csv", header=0)
+    df = pd.read_csv("../data-tooling/" + table_name + ".csv", header=0, sep=';')
     # remove whitespaces in column names and cast to lowercase
     df.columns = df.columns.str.replace(' ', '_')
     df.columns = df.columns.str.lower()

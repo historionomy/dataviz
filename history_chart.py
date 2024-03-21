@@ -14,7 +14,7 @@ metrics = [
 ]
 
 # Function to create a bar chart with absolute years
-def create_year_chart(history_data, legend_data, stats_data, language_labels, mode, relative_status, metric):
+def create_year_chart(history_data, legend_data, stats_data, language_labels, mode, relative_status, metric, sort_status):
 
     # we filter country datasets that are empty
     if len(history_data) > 0:
@@ -39,7 +39,7 @@ def create_year_chart(history_data, legend_data, stats_data, language_labels, mo
 
                     # if we are in relative mode, we will substract the year_start of the pivot status to starting year
                     country_offset = 0
-                    if mode == "Relative":
+                    if mode == language_labels['relative_display_mode_label']:
                         country_offset = history_data[country].loc[history_data[country]['status'] == relative_status, 'year_start'].iloc[0]
 
                     # we sort all historionomical steps by ascending order of year_start, to avoid inconsistencies in the display
@@ -57,7 +57,7 @@ def create_year_chart(history_data, legend_data, stats_data, language_labels, mo
 
                     # we compute the index of the pivot status in the current country course
                     pivot_index = 0
-                    if mode == "Relative":
+                    if mode == language_labels['relative_display_mode_label']:
                         pivot_index = history_data[country][history_data[country]['status'] == relative_status].index[0]
 
                     for i in range(1, nb_steps + 1):
@@ -71,8 +71,8 @@ def create_year_chart(history_data, legend_data, stats_data, language_labels, mo
                         diff = history_data[country]['year_start'].iloc[-i] - history_data[country]['year_start'].iloc[-i-1]
                         # we check that the difference between contiguous steps is positive to avoid problems
                         if diff >= 0:
-                            if mode == "Relative":
-                                # in "relative" display mode, the "year_start" needs to be NEGATIVE for steps BEFORE THE PIVOT STATUS, for display purposes, otherwise the oldest step will be displayed OVER the newest one before the pivot status
+                            if mode == language_labels['relative_display_mode_label']:
+                                # in language_labels['relative_display_mode_label'] display mode, the "year_start" needs to be NEGATIVE for steps BEFORE THE PIVOT STATUS, for display purposes, otherwise the oldest step will be displayed OVER the newest one before the pivot status
                                 if country_offset >= history_data[country]['year_start'].iloc[-i]:
                                     diff = - diff
                             history_data[country].loc[index_to_modify, 'year_start'] = diff
@@ -87,6 +87,7 @@ def create_year_chart(history_data, legend_data, stats_data, language_labels, mo
                         # Now, use .loc to perform the assignment, thereby avoiding the warning and modifying the original DataFrame
                         history_data[country].loc[index_to_modify, 'year_display'] = history_data[country].loc[index_to_copy_from, 'year_display']
                         history_data[country].loc[index_to_modify, 'status'] = history_data[country].loc[index_to_copy_from, 'status']
+                        history_data[country].loc[index_to_modify, 'comment'] = history_data[country].loc[index_to_copy_from, 'comment']
 
                     # first status set to 'BARBARIANS'
                     first_index = history_data[country].index[0]
@@ -96,7 +97,7 @@ def create_year_chart(history_data, legend_data, stats_data, language_labels, mo
                     history_data[country].loc[first_index, 'year_display'] = 0
 
                     # set offset if relative datetime
-                    if mode == "Relative":
+                    if mode == language_labels['relative_display_mode_label']:
                         # print("Offsetting relative zero year")
                         # print(country_offset)
                         history_data[country].loc[first_index, 'year_start'] = history_data[country].loc[first_index, 'year_start'] - country_offset
@@ -119,26 +120,13 @@ def create_year_chart(history_data, legend_data, stats_data, language_labels, mo
                             # add country column to stats_data
                             stats_data[metric][country]['code'] = country
 
+                else:
+                    history_data[country] = pd.DataFrame()
+
         # we concatenate all historionomical courses for all countries as a single dataset for the bar chart
         history_data = {k:v for k,v in history_data.items() if len(v)>1}
-        # subset = ["NLD", "FRA", "GBR", "BRA"]
-                            
-        # sordid hack to force the "oligarchic republic" stages to be displayed BEFORE
-        # the Ancien Regime stage, by putting an oligarchic republic country as the top country
-        # because plotly create display order by scanning status by order of encounter
-        custom_oligarchic_status = False
-        chosen_country = "NLD"
-        for k, v in history_data.items():
-            if 'OLIGARCHIC_REVOLUTION' in v['status'].tolist():
-                custom_oligarchic_status = True
-                chosen_country = k
-                break
-        if custom_oligarchic_status:
-            custom_data = history_data.pop(chosen_country)
 
         data = pd.concat(history_data.values(), ignore_index=True)
-        if custom_oligarchic_status:
-            data = pd.concat([custom_data, data], ignore_index=True)
 
         # if a metric has been set, we do the same for OWID data for all countries
         owid_data = {}
@@ -158,6 +146,10 @@ def create_year_chart(history_data, legend_data, stats_data, language_labels, mo
             min_time = min(data['year_start'].tolist())
             max_time = max_display_length
 
+        if mode == language_labels['relative_display_mode_label']:
+            # Remove Barbarians
+            data = data[data['status'] != 'BARBARIANS']
+
         # remap status to language label
         status_mapping = pd.Series(legend_data[language_labels['label_column']].values,index=legend_data['code']).to_dict()
 
@@ -170,27 +162,67 @@ def create_year_chart(history_data, legend_data, stats_data, language_labels, mo
 
         color_map = {key: value for key, value in zip(domain, legend_range)}
 
+        # Create a dictionary to map status to the index in data
+        status_index_mapping = {status: index for index, status in enumerate(legend_data['code'])}
+
+        # Add a new column to df1 containing the index of each status in legend_data
+        data['index_in_legend'] = data['status'].map(status_index_mapping)
+
+        # list of countries ordered by first appearance of 'sort_status'
+
+        # Filter the DataFrame to include only rows where the "status" column matches the chosen label
+        filtered_df = data[data['year_display'] != 0]
+        filtered_df = filtered_df[filtered_df['status'] == status_mapping[sort_status]]
+
+        # # Sort the filtered DataFrame by ascending order on the "year_display" column
+        filtered_df = filtered_df.sort_values(by='year_display')
+
+        sorted_countries_status = filtered_df['country'].tolist()
+
+        # Filter the DataFrame to include only rows where year_display is non-zero
+        filtered_df = data[data['year_display'] != 0]
+
+        # Group by 'country' and find the index of the first non-zero 'year_display' for each group
+        first_non_zero_index = filtered_df.groupby('country').apply(lambda x: x.index.min())
+
+        # Sort the groups based on the indices of the first non-zero 'year_display' and extract the unique country values
+        sorted_countries_absolute = data.loc[first_non_zero_index].sort_values(by='year_display')['country'].unique().tolist()
+
+        sorted_countries = sorted_countries_status + [
+            ctry for ctry in sorted_countries_absolute if ctry not in sorted_countries_status
+        ]
+
         # rename columns for hover data consistency
         data.rename(columns={
             'status': language_labels['status'], 
             'year': language_labels['year'],
             'country': language_labels['country'],
+            'comment' : language_labels['comment'],
             'year_display': language_labels['year_display'],
             }, inplace=True)
 
         label_order = legend_data[language_labels['label_column']].tolist()
+        if mode == language_labels['relative_display_mode_label']:
+            # in relative display mode, we must flip the statuses before the relative_status
+            pivot_index = label_order.index(status_mapping[relative_status])
+            label_order = label_order[:pivot_index][::-1] + label_order[pivot_index:]
+
+        # print("Status order :")
+        # print(label_order)
+
         fig = px.bar(data, 
                     x='year_start', 
                     y=language_labels['country'], 
                     color=language_labels['status'], 
-                    category_orders={language_labels['label_column']: label_order},
+                    category_orders={language_labels['country']: sorted_countries, language_labels['status']: label_order},
                     color_discrete_map = color_map,
                     orientation="h", 
                     title=language_labels['timeline_chart_title'],
                     hover_data = [
                         language_labels['country'], 
                         language_labels['status'], 
-                        language_labels['year_display']
+                        language_labels['year_display'],
+                        language_labels['comment']
                         ],
                     labels={
                         'year_start': language_labels['x_label'],
@@ -246,13 +278,14 @@ def history_chart(history_data, legend_data, stats_data, language_labels):
         language_labels['relative_display_mode_label'],
     ]
     top_menu = st.columns(3)
+    middle_menu = st.columns(2)
     with top_menu[0]:
         timeline_type = st.selectbox(language_labels["timeline_display_label"], options=timeline_type_labels)
         relative_status = "NATIONAL_REVOLUTION_1"
-        if timeline_type == "Relative":
+        if timeline_type == language_labels['relative_display_mode_label']:
             status_options = legend_data['code'].dropna().tolist()
             status_options.remove("BARBARIANS")
-            relative_status = st.selectbox(language_labels['relative_status_label'], options=status_options)
+            relative_status = st.selectbox(language_labels['relative_status_label'], key="relative_status", options=status_options)
 
     metrics_labels = [
         language_labels['stats_title'][metric]["label"] for metric in metrics
@@ -260,7 +293,7 @@ def history_chart(history_data, legend_data, stats_data, language_labels):
 
     # select metrics from Our World In Data
     with top_menu[1]:
-        chosen_metric = st.selectbox(language_labels["timeline_display_label"], options=metrics_labels)
+        chosen_metric = st.selectbox(language_labels["owid_data_display_label"], key="chosen_metric", options=metrics_labels)
         label2metrics = {
             v["label"]: k for k, v in language_labels['stats_title'].items()
         }
@@ -271,16 +304,30 @@ def history_chart(history_data, legend_data, stats_data, language_labels):
     selected_countries = []
     countries_checkboxes = {}
     select_all_countries = False
-    with top_menu[2]:
+    with middle_menu[0]:
         with st.expander(language_labels["country_selection_label"]):
             select_all_countries = st.checkbox(language_labels["country_selection_label"], value = True)
             country_search = st.text_input(language_labels["country_search_label"])
-            filtered_countries = [
+            filtered_countries = sorted([
                 country for country in available_countries if country.lower().startswith(country_search.lower())
-            ]
-            for filtered_country in filtered_countries:
-                country_selection = st.checkbox(filtered_country, key=filtered_country)
-                countries_checkboxes[filtered_country] = country_selection
+            ])
+            half_countries = int(len(filtered_countries) / 2)
+            countries_col_1, countries_col_2 = st.columns(2)
+            with countries_col_1:
+                for filtered_country in filtered_countries[:half_countries]:
+                    country_selection = st.checkbox(filtered_country, key=filtered_country)
+                    countries_checkboxes[filtered_country] = country_selection
+            with countries_col_2:
+                for filtered_country in filtered_countries[half_countries:]:
+                    country_selection = st.checkbox(filtered_country, key=filtered_country)
+                    countries_checkboxes[filtered_country] = country_selection
+
+    # select status to sort courses by
+    sort_status = "NATIONAL_REVOLUTION_1"
+    with top_menu[2]:
+        status_options = legend_data['code'].dropna().tolist()
+        status_options.remove("BARBARIANS")
+        sort_status = st.selectbox(language_labels['order_courses_label'], options=status_options)
 
     if not select_all_countries:
         selected_countries = [
@@ -294,7 +341,7 @@ def history_chart(history_data, legend_data, stats_data, language_labels):
     }
 
     if len(history_data)>0:
-        fig, fig2 = create_year_chart(history_data, legend_data, stats_data, language_labels, timeline_type, relative_status, chosen_metric)
+        fig, fig2 = create_year_chart(history_data, legend_data, stats_data, language_labels, timeline_type, relative_status, chosen_metric, sort_status)
         if fig2 is not None:
             st.plotly_chart(fig2, use_container_width=True)
         st.plotly_chart(fig, use_container_width=True)

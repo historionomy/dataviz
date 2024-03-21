@@ -149,6 +149,7 @@ def load_backend_data():
     num_records = len(backend_data['history'])
 
     num_countries = (num_records - 1) // 4
+    print(f"Nb countries : {num_countries}")
 
     history_dataframes = {}
 
@@ -158,24 +159,30 @@ def load_backend_data():
         str(ctry) for ctry in all_country_codes if (str(ctry) != "Modèle" and str(ctry) is not None)
     ]
 
-    for i in range(num_countries):
-        country_code = backend_data['history'].iloc[i*4+1]['alpha_3']
-        if country_code is not None:
-            if country_code in all_country_codes:
-                year_start = backend_data['history'].iloc[i*4+2, 2:].tolist()
-                year_finish = backend_data['history'].iloc[i*4+3, 2:].tolist()
-                status = backend_data['history'].iloc[i*4+1, 2:].tolist()
-                history_status = pd.DataFrame({"year_start": year_start, "year_finish": year_finish,"status": status})
-                history_status['country'] = country_code
-                history_status['year_start'] = pd.to_numeric(history_status['year_start'], errors='coerce')
-                history_status['year_finish'] = pd.to_numeric(history_status['year_finish'], errors='coerce')
-                history_status = history_status.dropna(subset=['year_start', 'status'])
-                history_status['year_finish'] = history_status['year_finish'].fillna(2024)
-                history_status = history_status.reset_index(drop=True)
-                history_status['year_start'] = history_status['year_start'].astype(int)
-                history_status['year_finish'] = history_status['year_finish'].astype(int)
-                history_status = history_status.sort_values(by='year_start', ascending=True).reset_index(drop=True)
-                history_dataframes[country_code] = history_status
+    # for i in range(num_countries):
+    for j in range(len(backend_data['history'])):
+        if backend_data['history'].iloc[j] is not None:
+            i = j - 1
+            if (i + 3) < len(backend_data['history']):
+                country_code = backend_data['history'].iloc[i+1]['alpha_3']
+                if country_code is not None:
+                    if country_code in all_country_codes:
+                        year_start = backend_data['history'].iloc[i+2, 2:].tolist()
+                        year_finish = backend_data['history'].iloc[i+3, 2:].tolist()
+                        status = backend_data['history'].iloc[0, 2:].tolist()
+                        comment = backend_data['history'].iloc[i+4, 2:].tolist()
+                        history_status = pd.DataFrame({"year_start": year_start, "year_finish": year_finish,"status": status})
+                        history_status['country'] = country_code
+                        history_status['comment'] = comment
+                        history_status['year_start'] = pd.to_numeric(history_status['year_start'], errors='coerce')
+                        history_status['year_finish'] = pd.to_numeric(history_status['year_finish'], errors='coerce')
+                        history_status = history_status.dropna(subset=['year_start', 'status'])
+                        history_status['year_finish'] = history_status['year_finish'].fillna(2024)
+                        history_status = history_status.reset_index(drop=True)
+                        history_status['year_start'] = history_status['year_start'].astype(int)
+                        history_status['year_finish'] = history_status['year_finish'].astype(int)
+                        history_status = history_status.sort_values(by='year_start', ascending=True).reset_index(drop=True)
+                        history_dataframes[country_code] = history_status
 
     stats_dataframes = {}
     for table_id in owid_datasets.keys():
@@ -200,12 +207,15 @@ languages_map_labels = {
         "timeline_chart_title" : "Stade historionomique par pays et par année",
         "status": "statut",
         "year": "durée",
+        "comment": "notes",
         "country" : "pays",
         "year_display": "année",
-        "timeline_display_label": "trier par",
+        "timeline_display_label": "alignement des parcours",
+        "owid_data_display_label": "métrique",
         "country_selection_label": "choisir les pays",
         "country_search_label" : "chercher pays",
         "relative_status_label" : "aligner les parcours sur l'étape",
+        "order_courses_label" : "trier les pays selon cette étape",
         "absolute_display_mode_label" : "Absolu",
         "relative_display_mode_label" : "Relatif",
         "stats_year_label" : "année",
@@ -239,12 +249,15 @@ languages_map_labels = {
         "timeline_chart_title" : "Historionomical stage by year and country",
         "status" : "status",
         "year" : "duration",
+        "comment": "comment",
         "country" : "country",
         "year_display": "year",
-        "timeline_display_label": "sort by",
+        "timeline_display_label": "courses chronological alignment",
+        "owid_data_display_label": "metric",
         "country_selection_label": "choose countries",
         "country_search_label" : "search country",
         "relative_status_label" : "Align courses on status",
+        "order_courses_label" : "Sort countries on this status",
         "absolute_display_mode_label" : "Absolute",
         "relative_display_mode_label" : "Relative",
         "stats_year_label" : "year",
