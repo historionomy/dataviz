@@ -11,8 +11,8 @@ from backend import login, load_data, load_data_debug
 from history_chart import history_chart
 import io
 
-MODE = "debug"
-# MODE = "run"
+# MODE = "debug"
+MODE = "run"
 
 backend_tables = [
     "countries",
