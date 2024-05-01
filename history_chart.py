@@ -192,6 +192,12 @@ def create_year_chart(history_data, legend_data, stats_data, language_labels, mo
             ctry for ctry in sorted_countries_absolute if ctry not in sorted_countries_status
         ]
 
+        # set countries common names
+        data['country'] = data['country'].map(language_labels['alpha_3_name_mapping'])
+        sorted_countries = [
+            language_labels['alpha_3_name_mapping'][ctry] for ctry in sorted_countries
+        ]
+
         # rename columns for hover data consistency
         data.rename(columns={
             'status': language_labels['status'], 
@@ -249,6 +255,9 @@ def create_year_chart(history_data, legend_data, stats_data, language_labels, mo
             
             owid_data = owid_data.sort_values(by='relative_year')
 
+            # set countries common names
+            owid_data[language_labels['country']] = owid_data[language_labels['country']].map(language_labels['alpha_3_name_mapping'])
+
             # figure of OWID statistics
             if metric != "none":
                 fig2 = px.line(owid_data, x='relative_year', y= language_labels['stats_title'][metric]['label'], color=language_labels['country'], 
@@ -278,7 +287,7 @@ def history_chart(history_data, legend_data, stats_data, language_labels):
         language_labels['relative_display_mode_label'],
     ]
     top_menu = st.columns(3)
-    middle_menu = st.columns(2)
+    middle_menu = st.columns(1)
     with top_menu[0]:
         timeline_type = st.selectbox(language_labels["timeline_display_label"], options=timeline_type_labels)
         relative_status = "NATIONAL_REVOLUTION_1"
@@ -301,26 +310,103 @@ def history_chart(history_data, legend_data, stats_data, language_labels):
 
     # select countries to display among available countries
     available_countries = history_data.keys()
+    countries_metadata = {
+        country_name : {
+            "region" : country['region'].iloc[0],
+            "family" : country['family'].iloc[0],
+            "age" : country['age'].iloc[0]
+        } for country_name, country in history_data.items() if (len(country)>0
+                                                                and not pd.isna(country['region'].iloc[0])
+                                                                and not pd.isna(country['family'].iloc[0])
+                                                                and not pd.isna(country['age'].iloc[0])
+        )
+    }
+    available_regions = list(set([country['region'] for country in countries_metadata.values()]))
+    available_families = list(set([country['family'] for country in countries_metadata.values()]))
+    available_ages = list(set([country['age'] for country in countries_metadata.values()]))
+
     selected_countries = []
     countries_checkboxes = {}
+    regions_checkboxes = {}
+    families_checkboxes = {}
+    ages_checkboxes = {}
     select_all_countries = False
     with middle_menu[0]:
         with st.expander(language_labels["country_selection_label"]):
-            select_all_countries = st.checkbox(language_labels["country_selection_label"], value = True)
+            # select all countries checkbox
+            select_all_countries = st.checkbox(language_labels["all_countries_selection_label"], value = True)
+            # select specific regions checkbox
+            st.text(language_labels["region_selection_label"])
+            for region in available_regions:
+                region_selection = st.checkbox(language_labels['region'][str(region)], key=region)
+                regions_checkboxes[region] = region_selection
+            selected_regions = [
+                reg for reg, selected in regions_checkboxes.items() if selected
+            ]
+            # select specific family structures checkbox
+            st.text(language_labels["family_selection_label"])
+            for family in available_families:
+                family_selection = st.checkbox(language_labels['family_type'][str(family)], key=family)
+                families_checkboxes[family] = family_selection
+            selected_families = [
+                fam for fam, selected in families_checkboxes.items() if selected
+            ]
+            # select specific ages checkbox
+            st.text(language_labels["age_selection_label"])
+            for age in available_ages:
+                age_selection = st.checkbox(str(int(age)), key=age)
+                ages_checkboxes[age] = age_selection
+            selected_ages = [
+                ag for ag, selected in ages_checkboxes.items() if selected
+            ]
+
+            if (len(selected_regions)>0 or len(selected_families)>0 or len(selected_ages)>0):
+                select_all_countries = False
+
+            # all selected countries
+            selected_countries = available_countries
+            if not select_all_countries:
+                if len(selected_regions) > 0:
+                    selected_countries = [
+                        ctry for ctry in selected_countries if (countries_metadata.get(ctry, {}).get('region', '') in selected_regions)
+                    ]
+                if len(selected_families) > 0:
+                    selected_countries = [
+                        ctry for ctry in selected_countries if (countries_metadata.get(ctry, {}).get('family', '') in selected_families)
+                    ]
+                if len(selected_ages) > 0:
+                    selected_countries = [
+                        ctry for ctry in selected_countries if (countries_metadata.get(ctry, {}).get('age', '') in selected_ages)
+                    ]
+
+
             country_search = st.text_input(language_labels["country_search_label"])
             filtered_countries = sorted([
-                country for country in available_countries if country.lower().startswith(country_search.lower())
+                country for country in selected_countries if country.lower().startswith(country_search.lower())
             ])
-            half_countries = int(len(filtered_countries) / 2)
-            countries_col_1, countries_col_2 = st.columns(2)
+
+            third_countries = int(len(filtered_countries) / 3)
+            countries_col_1, countries_col_2, countries_col_3 = st.columns(3)
             with countries_col_1:
-                for filtered_country in filtered_countries[:half_countries]:
-                    country_selection = st.checkbox(filtered_country, key=filtered_country)
+                for filtered_country in filtered_countries[:third_countries]:
+                    country_selection = st.checkbox(language_labels['alpha_3_name_mapping'][filtered_country], key=filtered_country, value=(filtered_country in selected_countries))
                     countries_checkboxes[filtered_country] = country_selection
             with countries_col_2:
-                for filtered_country in filtered_countries[half_countries:]:
-                    country_selection = st.checkbox(filtered_country, key=filtered_country)
+                for filtered_country in filtered_countries[third_countries:2*third_countries]:
+                    country_selection = st.checkbox(language_labels['alpha_3_name_mapping'][filtered_country], key=filtered_country, value=(filtered_country in selected_countries))
                     countries_checkboxes[filtered_country] = country_selection
+            with countries_col_3:
+                for filtered_country in filtered_countries[2*third_countries:]:
+                    country_selection = st.checkbox(language_labels['alpha_3_name_mapping'][filtered_country], key=filtered_country, value=(filtered_country in selected_countries))
+                    countries_checkboxes[filtered_country] = country_selection
+
+            unchecked_countries = [
+                ctry for ctry, selected in countries_checkboxes.items() if not selected
+            ]
+
+            selected_countries = [
+                ctry for ctry in selected_countries if ctry not in unchecked_countries
+            ]
 
     # select status to sort courses by
     sort_status = "NATIONAL_REVOLUTION_1"
@@ -328,13 +414,6 @@ def history_chart(history_data, legend_data, stats_data, language_labels):
         status_options = legend_data['code'].dropna().tolist()
         status_options.remove("BARBARIANS")
         sort_status = st.selectbox(language_labels['order_courses_label'], options=status_options)
-
-    if not select_all_countries:
-        selected_countries = [
-            ctry for ctry, selected in countries_checkboxes.items() if selected
-        ]
-    else:
-        selected_countries = available_countries
 
     history_data = {
         country: history_data[country] for country in selected_countries

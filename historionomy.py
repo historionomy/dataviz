@@ -1,5 +1,6 @@
 import streamlit as st
 import os
+import yaml
 import snowflake.connector
 import pandas as pd
 import geopandas as gpd
@@ -10,8 +11,8 @@ from backend import login, load_data, load_data_debug
 from history_chart import history_chart
 import io
 
-# MODE = "debug"
-MODE = "run"
+MODE = "debug"
+# MODE = "run"
 
 backend_tables = [
     "countries",
@@ -165,14 +166,20 @@ def load_backend_data():
             i = j - 1
             if (i + 3) < len(backend_data['history']):
                 country_code = backend_data['history'].iloc[i+1]['alpha_3']
+                country_region = backend_data['history'].iloc[i+1]['region']
+                country_age = backend_data['history'].iloc[i+1]['age']
+                country_famille = backend_data['history'].iloc[i+1]['famille']
                 if country_code is not None:
                     if country_code in all_country_codes:
-                        year_start = backend_data['history'].iloc[i+2, 2:].tolist()
-                        year_finish = backend_data['history'].iloc[i+3, 2:].tolist()
-                        status = backend_data['history'].iloc[0, 2:].tolist()
-                        comment = backend_data['history'].iloc[i+4, 2:].tolist()
+                        year_start = backend_data['history'].iloc[i+2, 5:].tolist()
+                        year_finish = backend_data['history'].iloc[i+3, 5:].tolist()
+                        status = backend_data['history'].iloc[0, 5:].tolist()
+                        comment = backend_data['history'].iloc[i+4, 5:].tolist()
                         history_status = pd.DataFrame({"year_start": year_start, "year_finish": year_finish,"status": status})
                         history_status['country'] = country_code
+                        history_status['region'] = country_region
+                        history_status['age'] = country_age
+                        history_status['family'] = country_famille
                         history_status['comment'] = comment
                         history_status['year_start'] = pd.to_numeric(history_status['year_start'], errors='coerce')
                         history_status['year_finish'] = pd.to_numeric(history_status['year_finish'], errors='coerce')
@@ -213,6 +220,10 @@ languages_map_labels = {
         "timeline_display_label": "alignement des parcours",
         "owid_data_display_label": "métrique",
         "country_selection_label": "choisir les pays",
+        "all_countries_selection_label": "tous les pays",
+        "region_selection_label": "choisir les régions",
+        "family_selection_label": "choisir les types familiaux",
+        "age_selection_label": "choisir l'âge historionomique",
         "country_search_label" : "chercher pays",
         "relative_status_label" : "aligner les parcours sur l'étape",
         "order_courses_label" : "trier les pays selon cette étape",
@@ -255,6 +266,10 @@ languages_map_labels = {
         "timeline_display_label": "courses chronological alignment",
         "owid_data_display_label": "metric",
         "country_selection_label": "choose countries",
+        "all_countries_selection_label": "all countries",
+        "region_selection_label": "choose regions",
+        "family_selection_label": "choose family types",
+        "age_selection_label": "choose historionomic age",
         "country_search_label" : "search country",
         "relative_status_label" : "Align courses on status",
         "order_courses_label" : "Sort countries on this status",
@@ -326,6 +341,17 @@ stats_data = {
         k: v for k, v in dat.items() if k in history_data.keys()
     } for mtr, dat in stats_data.items()
 }
+
+### extra data file for translation of metada
+data_file = "data.yml"
+
+custom_data_content = {}
+with open(data_file, "r") as file:
+    custom_data_content = yaml.load(file, Loader=yaml.FullLoader)
+
+for lang in ['FR', 'EN']:
+    for custom_dataset in ['region', 'family_type', 'alpha_3_name_mapping']:
+        languages_map_labels[lang][custom_dataset] =  custom_data_content[custom_dataset].get(lang, {})
 
 ### extract legend data
 legend_data = backend_data['labels'][['code', 'label_fr', 'label_en', 'color', 'stripecolor']]

@@ -1,0 +1,418 @@
+region:
+  EN:
+    Europe: Europe
+    Moyen-Orient: Middle East
+    Afrique: Africa
+    Amérique: America
+    Asie: Asia
+
+family_type:
+  EN:
+    nucléaire corésidence: nuclear with coresidence
+    africain: african
+    nucléaire absolu: absolute nuclear
+    communautaire: community
+    souche: stub
+    communautaire endogame: endogamous community
+    nucléaire égalitaire: egalitarian nuclear
+    nucléaire matrilocal: matrilocal nuclear
+
+alpha_3_name_mapping:
+  FR:
+    AFG: Afghanistan
+    ZAF: Afrique du Sud
+    ALB: Albanie
+    DZA: Algérie
+    DEU: Allemagne
+    AND: Andorre
+    AGO: Angola
+    ATG: Antigua-et-Barbuda
+    SAU: Arabie Saoudite
+    ARG: Argentine
+    ARM: Arménie
+    AUS: Australie
+    AUT: Autriche
+    AZE: Azerbaïdjan
+    BHS: Bahamas
+    BHR: Bahreïn
+    BGD: Bangladesh
+    BRB: Barbade
+    BEL: Belgique
+    BLZ: Belize
+    BEN: Bénin
+    BTN: Bhoutan
+    BLR: Biélorussie
+    MMR: Birmanie
+    BOL: Bolivie
+    BIH: Bosnie-Herzégovine
+    BWA: Botswana
+    BRA: Brésil
+    BRN: Brunei
+    BGR: Bulgarie
+    BFA: Burkina Faso
+    BDI: Burundi
+    KHM: Cambodge
+    CMR: Cameroun
+    CAN: Canada
+    CPV: Cap-Vert
+    CHL: Chili
+    CHN: Chine
+    CYP: Chypre
+    COL: Colombie
+    COM: Comores
+    PRK: Corée du Nord
+    KOR: Corée du Sud
+    CRI: Costa Rica
+    CIV: Côte d’Ivoire
+    HRV: Croatie
+    CUB: Cuba
+    DNK: Danemark
+    DJI: Djibouti
+    DMA: Dominique
+    EGY: Égypte
+    ARE: Émirats arabes unis
+    ECU: Équateur
+    ERI: Érythrée
+    ESP: Espagne
+    EST: Estonie
+    SWZ: Eswatini
+    USA: États-Unis
+    ETH: Éthiopie
+    FJI: Fidji
+    FIN: Finlande
+    FRA: France
+    GAB: Gabon
+    GMB: Gambie
+    GEO: Géorgie
+    GHA: Ghana
+    GRC: Grèce
+    GRD: Grenade
+    GTM: Guatemala
+    GIN: Guinée
+    GNQ: Guinée équatoriale
+    GNB: Guinée-Bissau
+    GUY: Guyana
+    HTI: Haïti
+    HND: Honduras
+    HUN: Hongrie
+    COK: Îles Cook
+    MHL: Îles Marshall
+    IND: Inde
+    IDN: Indonésie
+    IRQ: Irak
+    IRN: Iran
+    IRL: Irlande
+    ISL: Islande
+    ISR: Israël
+    ITA: Italie
+    JAM: Jamaïque
+    JPN: Japon
+    JOR: Jordanie
+    KAZ: Kazakhstan
+    KEN: Kenya
+    KGZ: Kirghizistan
+    KIR: Kiribati
+    KWT: Koweït
+    LAO: Laos
+    LSO: Lesotho
+    LVA: Lettonie
+    LBN: Liban
+    LBR: Liberia
+    LBY: Libye
+    LIE: Liechtenstein
+    LTU: Lituanie
+    LUX: Luxembourg
+    MKD: Macédoine
+    MDG: Madagascar
+    MYS: Malaisie
+    MWI: Malawi
+    MDV: Maldives
+    MLI: Mali
+    MLT: Malte
+    MAR: Maroc
+    MUS: Maurice
+    MRT: Mauritanie
+    MEX: Mexique
+    FSM: Micronésie
+    MDA: Moldavie
+    MCO: Monaco
+    MNG: Mongolie
+    MNE: Monténégro
+    MOZ: Mozambique
+    NAM: Namibie
+    NRU: Nauru
+    NPL: Népal
+    NIC: Nicaragua
+    NER: Niger
+    NGA: Nigeria
+    NIU: Niue
+    NOR: Norvège
+    NZL: Nouvelle-Zélande
+    OMN: Oman
+    UGA: Ouganda
+    UZB: Ouzbékistan
+    PAK: Pakistan
+    PLW: Palaos
+    PSE: Palestine
+    PAN: Panama
+    PNG: Papouasie-Nouvelle-Guinée
+    PRY: Paraguay
+    NLD: Pays-Bas
+    PER: Pérou
+    PHL: Philippines
+    POL: Pologne
+    PRT: Portugal
+    QAT: Qatar
+    CAF: République centrafricaine
+    COD: République démocratique du Congo
+    DOM: République Dominicaine
+    COG: République du Congo
+    CZE: République tchèque
+    ROU: Roumanie
+    GBR: Royaume-Uni
+    RUS: Russie
+    RWA: Rwanda
+    KNA: Saint-Kitts-et-Nevis
+    SMR: Saint-Marin
+    VCT: Saint-Vincent-et-les-Grenadines
+    LCA: Sainte-Lucie
+    SLB: Salomon
+    SLV: Salvador
+    WSM: Samoa
+    STP: São Tomé-et-Principe
+    SEN: Sénégal
+    SRB: Serbie
+    SYC: Seychelles
+    SLE: Sierra Leone
+    SGP: Singapour
+    SVK: Slovaquie
+    SVN: Slovénie
+    SOM: Somalie
+    SDN: Soudan
+    SSD: Soudan du Sud
+    LKA: Sri Lanka
+    SWE: Suède
+    CHE: Suisse
+    SUR: Suriname
+    SYR: Syrie
+    TJK: Tadjikistan
+    TWN: Taïwan
+    TZA: Tanzanie
+    TCD: Tchad
+    THA: Thaïlande
+    TLS: Timor oriental
+    TGO: Togo
+    TON: Tonga
+    TTO: Trinité-et-Tobago
+    TUN: Tunisie
+    TKM: Turkménistan
+    TUR: Turquie
+    TUV: Tuvalu
+    UKR: Ukraine
+    URY: Uruguay
+    VUT: Vanuatu
+    VAT: Vatican
+    VEN: Venezuela
+    VNM: Viêt Nam
+    YEM: Yémen
+    ZMB: Zambie
+    ZWE: Zimbabwe
+  EN:
+    AFG: Afghanistan
+    ZAF: South Africa
+    ALB: Albania
+    DZA: Algeria
+    DEU: Germany
+    AND: Andorre
+    AGO: Angola
+    ATG: Antigua-and-Barbuda
+    SAU: Saudi Arabia
+    ARG: Argentine
+    ARM: Armenia
+    AUS: Australia
+    AUT: Austria
+    AZE: Azerbaïdjan
+    BHS: Bahamas
+    BHR: Bahreïn
+    BGD: Bangladesh
+    BRB: Barbade
+    BEL: Belgium
+    BLZ: Belize
+    BEN: Benin
+    BTN: Bhutan
+    BLR: Belarus
+    MMR: Birmania
+    BOL: Bolivia
+    BIH: Bosnia-Herzegovin
+    BWA: Botswana
+    BRA: Brazil
+    BRN: Brunei
+    BGR: Bulgaria
+    BFA: Burkina Faso
+    BDI: Burundi
+    KHM: Cambodia
+    CMR: Cameroun
+    CAN: Canada
+    CPV: Cape Verde
+    CHL: Chile
+    CHN: China
+    CYP: Cyprus
+    COL: Colombia
+    COM: Comores
+    PRK: North Korea
+    KOR: South Korea
+    CRI: Costa Rica
+    CIV: Ivory Coast
+    HRV: Croatia
+    CUB: Cuba
+    DNK: Denmark
+    DJI: Djibouti
+    DMA: Dominique
+    EGY: Egypt
+    ARE: United Arab Emirates
+    ECU: Ecuador
+    ERI: Erythrea
+    ESP: Spain
+    EST: Estonia
+    SWZ: Eswatini
+    USA: United States
+    ETH: Ethiopia
+    FJI: Fidji
+    FIN: Finland
+    FRA: France
+    GAB: Gabon
+    GMB: Gambia
+    GEO: Georgia
+    GHA: Ghana
+    GRC: Greece
+    GRD: Grenade
+    GTM: Guatemala
+    GIN: Guinea
+    GNQ: Equatorial Guinea
+    GNB: Guinea Bissau
+    GUY: Guyana
+    HTI: Haïti
+    HND: Honduras
+    HUN: Hungary
+    COK: Cook Islands
+    MHL: Marshall Islands
+    IND: India
+    IDN: Indonesia
+    IRQ: Iraq
+    IRN: Iran
+    IRL: Ireland
+    ISL: Iceland
+    ISR: Israël
+    ITA: Italia
+    JAM: Jamaica
+    JPN: Japan
+    JOR: Jordania
+    KAZ: Kazakhstan
+    KEN: Kenya
+    KGZ: Kirghizistan
+    KIR: Kiribati
+    KWT: Koweït
+    LAO: Laos
+    LSO: Lesotho
+    LVA: Lettonia
+    LBN: Liban
+    LBR: Liberia
+    LBY: Libya
+    LIE: Liechtenstein
+    LTU: Lituania
+    LUX: Luxembourg
+    MKD: Macedonia
+    MDG: Madagascar
+    MYS: Malaysia
+    MWI: Malawi
+    MDV: Maldives
+    MLI: Mali
+    MLT: Malta
+    MAR: Morocco
+    MUS: Maurice
+    MRT: Mauritania
+    MEX: Mexico
+    FSM: Micronesia
+    MDA: Moldavia
+    MCO: Monaco
+    MNG: Mongolia
+    MNE: Montenegro
+    MOZ: Mozambique
+    NAM: Namibia
+    NRU: Nauru
+    NPL: Nepal
+    NIC: Nicaragua
+    NER: Niger
+    NGA: Nigeria
+    NIU: Niue
+    NOR: Norway
+    NZL: New-Zealand
+    OMN: Oman
+    UGA: Uganda
+    UZB: Uzbekistan
+    PAK: Pakistan
+    PLW: Palaos
+    PSE: Palestine
+    PAN: Panama
+    PNG: Papoua New Guinea
+    PRY: Paraguay
+    NLD: Netherlands
+    PER: Peru
+    PHL: Philippines
+    POL: Poland
+    PRT: Portugal
+    QAT: Qatar
+    CAF: Central African Republic
+    COD: Democratic Republic of the Congo
+    DOM: Dominican Republic
+    COG: Republic of the Congo
+    CZE: Czech Republic
+    ROU: Romania
+    GBR: United Kingdom
+    RUS: Russia
+    RWA: Rwanda
+    KNA: Saint-Kitts-et-Nevis
+    SMR: Saint-Marin
+    VCT: Saint-Vincent-et-les-Grenadines
+    LCA: Sainte-Lucie
+    SLB: Salomon
+    SLV: Salvador
+    WSM: Samoa
+    STP: São Tomé-et-Principe
+    SEN: Senegal
+    SRB: Serbia
+    SYC: Seychelles
+    SLE: Sierra Leone
+    SGP: Singapour
+    SVK: Slovakia
+    SVN: Slovenia
+    SOM: Somalia
+    SDN: Sudan
+    SSD: South Sudan
+    LKA: Sri Lanka
+    SWE: Sweden
+    CHE: Switzerland
+    SUR: Suriname
+    SYR: Syria
+    TJK: Tadjikistan
+    TWN: Taïwan
+    TZA: Tanzania
+    TCD: Chad
+    THA: Thaïland
+    TLS: East Timor
+    TGO: Togo
+    TON: Tonga
+    TTO: Trinité-et-Tobago
+    TUN: Tunisia
+    TKM: Turkmenistan
+    TUR: Turkey
+    TUV: Tuvalu
+    UKR: Ukraine
+    URY: Uruguay
+    VUT: Vanuatu
+    VAT: Vatican
+    VEN: Venezuela
+    VNM: Viet Nam
+    YEM: Yemen
+    ZMB: Zambia
+    ZWE: Zimbabwe
