@@ -5,6 +5,14 @@ region:
     Afrique: Africa
     Amérique: America
     Asie: Asia
+    Océanie: Oceania
+  FR:
+    Europe: Europe
+    Moyen-Orient: Moyen-Orient
+    Afrique: Afrique
+    Amérique: Amérique
+    Asie: Asie
+    Océanie: Océanie
 
 family_type:
   EN:
@@ -16,6 +24,15 @@ family_type:
     communautaire endogame: endogamous community
     nucléaire égalitaire: egalitarian nuclear
     nucléaire matrilocal: matrilocal nuclear
+  FR:
+    nucléaire corésidence: nucléaire corésidence
+    africain: africain
+    nucléaire absolu: nucléaire absolu
+    communautaire: communautaire
+    souche: souche
+    communautaire endogame: communautaire endogame
+    nucléaire égalitaire: nucléaire égalitaire
+    nucléaire matrilocal: nucléaire matrilocal
 
 alpha_3_name_mapping:
   FR:

@@ -10,6 +10,11 @@ from text_content import content_translations
 from backend import login, load_data, load_data_debug
 from history_chart import history_chart
 import io
+import re
+# import fsspec
+from io import BytesIO
+import requests
+import zipfile
 
 # MODE = "debug"
 MODE = "run"
@@ -29,6 +34,33 @@ owid_datasets = {
     "urbanization" : "long-term-urban-population-region",
     "gov" : "historical-gov-spending-gdp"
 }
+
+# Load markdown content
+def load_markdown_file(filepath):
+    with open(filepath, "r", encoding="utf-8") as file:
+        content = file.read()
+    return content
+
+# Display mardown with images included
+def st_markdown(markdown_string):
+    parts = re.split(r"!\[(.*?)\]\((.*?)\)", markdown_string)
+    for i, part in enumerate(parts):
+        if i % 3 == 0:
+            st.markdown(part, unsafe_allow_html=True)
+        elif i % 3 == 1:
+            title = part
+        else:
+            # Center the image with HTML and CSS
+            cols = st.columns([1, 4, 1])
+            custom_width = 1000
+            if "archaique" in part:
+                custom_width = 600
+            if "anthropologie" in part:
+                custom_width = 800
+            if "europe" in part:
+                custom_width = 600
+            with cols[1]:
+                st.image(part, width=custom_width)  # Add caption if you want -> , caption=title)
 
 def create_db_connection():
 
@@ -69,8 +101,28 @@ def load_image(mode):
 def load_world_map(mode):
     # Load your GeoPandas DataFrame
     if mode != "debug":
-        # Replace this with your GeoPandas DataFrame loading
-        world = gpd.read_file(gpd.datasets.get_path('naturalearth_lowres'))
+
+        zip_file_path = "assets/ne_110m_admin_0_countries.zip"
+
+        # Step 1: Extract the contents of the ZIP file
+        extract_path = "natural_earth_data"  # Local directory to extract the data
+        with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
+            zip_ref.extractall(extract_path)
+
+        # Step 2: Find the .shp file inside the extracted folder
+        # Assuming the .shp file is the main file you want to load with GeoPandas
+        for file_name in os.listdir(extract_path):
+            if file_name.endswith(".shp"):
+                shapefile_path = os.path.join(extract_path, file_name)
+                break
+
+        # Step 3: Load the shapefile into a GeoDataFrame
+        world = gpd.read_file(shapefile_path)
+
+        # Reset some failed data in dataset
+        # Set ISO_A3 to 'FRA' where SOVEREIGNT is 'France'
+        world.loc[world['SOVEREIGNT'] == 'France', 'ISO_A3'] = 'FRA'
+        world.loc[world['SOVEREIGNT'] == 'Norway', 'ISO_A3'] = 'NOR'
 
         # Convert the GeoPandas geometries to GeoJSON
         geojson = world.__geo_interface__
@@ -88,15 +140,13 @@ def load_world_map(mode):
         data = raw_data.merge(legend, left_on='stage', right_on='code', how='left')
         data = data.drop('code', axis=1)
 
-        world_merged = world.merge(data, left_on='iso_a3', right_on="alpha_3", how='left')
+        world_merged = world.merge(data, left_on='ISO_A3', right_on="alpha_3", how='left')
 
         # Default color for other countries
         world_merged['color'].fillna('lightgrey', inplace=True)
         world_merged.loc[pd.isna(world_merged['stripeColor']), 'stripeColor'] = ''
         world_merged['stripe'] = world_merged['stripeColor'] != ''
         world_merged.loc[world_merged['stripeColor'] == '', 'stripeColor'] = '#00000000'
-
-        # histo_stages = legend['code']
 
         # Color Scale
         color_scale = {
@@ -304,6 +354,8 @@ languages_map_labels = {
 # APP START #
 #############
 
+st.set_page_config(layout="wide")
+
 ### DATA LOADING AND PREPROCESSING
 
 # Custom CSS to force word wrap
@@ -404,11 +456,12 @@ with st.container():
         click_data = get_click_data()
 
     # Create main tabs
-    introduction_tab, world_map_tab, histo_stages_tab, data_tab, resources_tab = st.tabs([
+    introduction_tab, world_map_tab, histo_stages_tab, data_tab, extra_tab, resources_tab = st.tabs([
         language_content.get("intro_tab", "Introduction Title"),
         language_content.get("map_tab", "Map Title"),
         language_content.get("stages_tab", "Stages Title"),
-        language_content.get("data_tab", "Data Title"),
+        language_content.get("data_tab", "Extra Title"),
+        language_content.get("extra_tab", "Data Title"),
         language_content.get("resources_tab", "Resources Title"),
     ])
 
@@ -416,7 +469,13 @@ with st.container():
 
         st.header(language_content.get("intro_title", "Introduction Title"))
 
-        st.markdown(format('<div class="word-wrap">%s</div>' % language_content.get("intro_content", "Lorem Ipsum")), unsafe_allow_html=True)
+        # st.markdown(format('<div class="word-wrap">%s</div>' % language_content.get("intro_content", "Lorem Ipsum")), unsafe_allow_html=True)
+        
+        # Get markdown content
+        markdown_content = load_markdown_file(f"text_content/intro_{st.session_state['selected_language']}.md")
+        # Display the markdown content in the app
+        # st.markdown(markdown_content, unsafe_allow_html=True)
+        st_markdown(markdown_content)
 
     with world_map_tab:
 
@@ -443,17 +502,34 @@ with st.container():
 
         st.markdown(format('<div class="word-wrap">%s</div>' % language_content.get("data_content", "Lorem Ipsum")), unsafe_allow_html=True)
 
+    with extra_tab:
+
+        st.header(language_content.get("extra_title", "Extra Title"))
+
+        # Get markdown content
+        markdown_content = load_markdown_file(f"text_content/extra_models_{st.session_state['selected_language']}.md")
+        # Display the markdown content in the app
+        # st.markdown(markdown_content, unsafe_allow_html=True)
+        st_markdown(markdown_content)
+
     with histo_stages_tab:
 
         st.header(language_content.get("stages_title", "Introduction Title"))
 
-        st.markdown(format('<div class="word-wrap">%s</div>' % language_content.get("stages_content", "Lorem Ipsum")), unsafe_allow_html=True)
+        # st.markdown(format('<div class="word-wrap">%s</div>' % language_content.get("stages_content", "Lorem Ipsum")), unsafe_allow_html=True)
 
-        if MODE != "debug":
-            # Display the image in Streamlit
-            st.image(historionomical_stages_img, use_column_width=True)
+        # if MODE != "debug":
+        #     # Display the image in Streamlit
+        #     st.image(historionomical_stages_img, use_column_width=True)
 
-        st.markdown(format('<div class="word-wrap">%s</div>' % language_content.get("stages_description", "Lorem Ipsum")), unsafe_allow_html=True)
+        # st.markdown(format('<div class="word-wrap">%s</div>' % language_content.get("stages_description", "Lorem Ipsum")), unsafe_allow_html=True)
+
+        # Get markdown content
+        markdown_content = load_markdown_file(f"text_content/anthropo_{st.session_state['selected_language']}.md")
+        # Display the markdown content in the app
+        # st.markdown(markdown_content, unsafe_allow_html=True)
+        st_markdown(markdown_content)
+
 
     with resources_tab:
 

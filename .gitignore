@@ -161,3 +161,6 @@ cython_debug/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Asset unzipped folder
+natural_earth_data/*

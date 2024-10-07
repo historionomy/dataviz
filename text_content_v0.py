@@ -28,8 +28,6 @@ The approach to identifying these historical patterns is essentially comparative
         "data_content" : "Historionomical Data for all countries",
         "stages_tab" : "Stages",
         "stages_title" : "Visualization of Historionomical Stages",
-        "extra_tab" : "Extra models",
-        "extra_title" : "Additional models to Historionomy",
         "stages_content" : """
 This diagram illustrates the different phases of the historionomic journey of nation-states, featuring both the standard course and the internal variant 'Oligarchic Republic'. It is taken from <a href="https://historionomie.fandom.com/fr/wiki/Historionomy_101">Historionomy 101</a>.""",
         "stages_description" : """
@@ -115,8 +113,6 @@ La démarche pour identifier ces schémas historiques est essentiellement compar
         "data_tab" : "Data",
         "data_title" : "Données historionomiques pour tous les pays",
         "data_content" : "Données historionomiques pour tous les pays",
-        "extra_tab" : "Modèles complémentaires",
-        "extra_title" : "Modèles complémentaires à l'historiomomie",
         "stages_tab" : "Etapes",
         "stages_title" : "Visualisation des étapes historionomiques",
         "stages_content" : """
@@ -163,7 +159,9 @@ Exemple : La guerre civile anglaise commence en 1642 et dure jusqu'en 1651. Apr�
 
 Après la mort de Cromwell en 1658, la situation politique reste instable. Finalement, en 1660, la monarchie est restaurée, marquant la fin du Commonwealth anglais. Charles II, le fils du roi Charles I exécuté, revient de l'exil et est accueilli comme roi. Cependant, la monarchie est rétablie comme une monarchie constitutionnelle, ce qui signifie que les pouvoirs du monarque sont limités par l'autorité du Parlement.
 
-Ce cours représente une trajectoire "idéale" où des perturbations majeures ne freinent pas l'évolution sociale de la confédération, ou ce que nous appelons maintenant un État-nation. Il ne peut pas progresser beaucoup plus vite car il est étroitement lié aux constantes cognitives humaines et à la vitesse à laquelle une société évolue et réalise l'homogénéisation culturelle à grande échelle. Cependant, il peut ralentir, s'arrêter complètement, dérailler, ou même redémarrer.
+Ce cours représente une trajectoire "idéale" où des perturbations majeures ne freinent pas l'évolution sociale de la confédération, ou ce que nous appelons maintenant un État-nation. Il ne peut pas progresser beaucoup plus vite car il est étroitement lié aux constantes cognitives humaines et à la vitesse à laquelle une société évolue et réalise l'homogénéisation culturelle à grande échelle. Cependant, il peut ralentir, s'arrêter complètement, dé
+
+railler, ou même redémarrer.
 
 Un type de perturbation se produit lorsque les oligarques parviennent à prévaloir dans leur lutte contre le souverain. Cela peut arriver à tout moment dans le processus, mais il est plus probable que cela se produise lorsque le souverain est faible, comme au début, pendant les guerres civiles, ou lors d'une "Fronde" réussie aux premiers stades de la "souveraineté absolue". Les invasions ou perturbations extérieures peuvent également affaiblir le souverain au point où les oligarques reprennent le contrôle.
 

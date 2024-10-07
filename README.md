@@ -76,4 +76,58 @@ The datatab combined two charts, whose creation is managed by function `history_
 
 ## Dev mode
 
+### Python environment
+
+Install conda, a environment manager for python :
+
+On Linux
+
+```bash
+wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh
+bash ~/miniconda.sh -b -p $HOME/miniconda
+eval "$($HOME/miniconda/bin/conda shell.bash hook)"
+conda init
+```
+
+On MacOS (you will be prompted for admin password at some moments):
+
+```bash
+mkdir -p ~/miniconda3
+curl https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -o ~/miniconda3/miniconda.sh
+bash ~/miniconda3/miniconda.sh -b -u -p ~/miniconda3
+rm -rf ~/miniconda3/miniconda.sh
+~/miniconda3/bin/conda init bash
+~/miniconda3/bin/conda init zsh
+```
+
+Move to your work folder, and create a conda environment for the project :
+
+```bash
+cd $WORKFOLDER ### move to your workfolder
+conda create -n histo python=3.11 ### this command create a local environment in python 3.11
+```
+
+Now, activate the python 3.11 environment you just created :
+
+```bash
+export CONDA_ENV=privacy
+conda activate $CONDA_ENV
+```
+
+This command will add the name of the environment between parenthesis on your command line prompt.
+
+If you need to exit from the conda environment, simply run :
+
+```bash
+conda deactivate
+```
+
+### Launch app locally
+
 In `historionomy.py`, at the top of the file, there is a global function `MODE`. Set it to `debug` when you are developing the app, it allows to skip the loading of the World Map and the Stages Chart, and will load backend data from csv files in a folder `../data-tooling` relative to your current app folder.
+
+Launch app locally with command :
+
+```bash
+streamlit run historionomy.py
+```
