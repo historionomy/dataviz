@@ -12,4 +12,4 @@ level = "info"
 messageFormat = "%(asctime)s %(message)s"
 
 [layout]
-page_layout = "wide"
+page_layout = "centered"

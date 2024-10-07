@@ -354,7 +354,7 @@ languages_map_labels = {
 # APP START #
 #############
 
-st.set_page_config(layout="wide")
+st.set_page_config(layout="centered")
 
 ### DATA LOADING AND PREPROCESSING
 
